@@ -66,16 +66,19 @@
     <!-- 新增收支表單 -->
     <form id="addForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
       
-      <!-- 1. 收支類型 -->
+      <!-- 1. 日期 (最前面，預設為當天) -->
+      <input id="itemDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
+
+      <!-- 2. 收支類型 -->
       <select id="itemType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
         <option value="支出">支出</option>
         <option value="收入">收入</option>
       </select>
 
-      <!-- 2. 項目名稱 -->
+      <!-- 3. 項目名稱 -->
       <input id="itemTitle" type="text" placeholder="項目名稱 (如: 瓦斯費)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
       
-      <!-- 3. 類別 -->
+      <!-- 4. 類別 -->
       <select id="itemCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
         <option value="adorable">adorable</option>
         <option value="固定支出">固定支出</option>
@@ -95,23 +98,23 @@
         <option value="電信費">電信費</option>
       </select>
 
-      <!-- 4. 花費歸屬 -->
+      <!-- 5. 花費歸屬 -->
       <select id="itemScope" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
         <option value="mu">mu</option>
         <option value="mu&jun">mu&jun</option>
         <option value="adorable">adorable</option>
       </select>
 
-      <!-- 5. 金額 -->
+      <!-- 6. 金額 -->
       <input id="itemAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
 
-      <!-- 6. 幣別 -->
+      <!-- 7. 幣別 -->
       <select id="itemCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
         <option value="KRW">₩ KRW</option>
         <option value="TWD">NT$ TWD</option>
       </select>
 
-      <!-- 7. 送出按鈕 -->
+      <!-- 8. 送出按鈕 -->
       <button id="submitBtn" type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition shadow-sm">
         同步送出
       </button>
@@ -129,6 +132,12 @@
 
     let budget = Number(localStorage.getItem('my_monthly_budget')) || 1000000;
     let items = [];
+
+    // 初始化日期輸入框為今天 (YYYY-MM-DD)
+    function setTodayDate() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('itemDate').value = today;
+    }
 
     // 修改預算上限 (KRW)
     function editBudget() {
@@ -246,6 +255,7 @@
           catHtml += `
             <div class="flex justify-between items-center px-5 py-3.5 hover:bg-gray-50/50 transition">
               <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-400 font-mono">${item.date || ''}</span>
                 <span class="text-xs px-2 py-0.5 rounded-full ${isIncome ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} font-semibold">${item.type || '支出'}</span>
                 <span class="text-sm font-medium text-gray-800">${item.title}</span>
                 <span class="text-xs text-gray-400">(${item.scope || 'mu'})</span>
@@ -269,6 +279,7 @@
       submitBtn.innerText = "寫入中...";
 
       const newItem = {
+        date: document.getElementById('itemDate').value, // 👉 第一個欄位：日期
         type: document.getElementById('itemType').value,
         title: document.getElementById('itemTitle').value,
         category: document.getElementById('itemCategory').value,
@@ -297,10 +308,12 @@
 
       document.getElementById('itemTitle').value = '';
       document.getElementById('itemAmount').value = '';
+      setTodayDate(); // 重設為今日日期
       submitBtn.disabled = false;
       submitBtn.innerText = "同步送出";
     });
 
+    setTodayDate();
     fetchFromGoogleSheets();
   </script>
 </body>
