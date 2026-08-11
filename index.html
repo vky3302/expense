@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>固定支出與預算管理助手</title>
+  <title>記帳表📝</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen p-4 md:p-8">
-  <div class="max-w-3xl mx-auto space-y-6">
+  <div class="max-w-4xl mx-auto space-y-6">
     
     <!-- 頂部標題與狀態 -->
     <header class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">📊 固定支出與預算助手</h1>
+        <h1 class="text-2xl font-bold text-gray-900">記帳表📝</h1>
         <div class="flex items-center gap-2 mt-1">
           <span id="syncStatus" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           <span id="syncText" class="text-xs text-gray-500">已連線至 Google Sheets</span>
@@ -27,7 +27,7 @@
     <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
       <div class="flex justify-between items-end">
         <div>
-          <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">本月支出預估 (KRW)</span>
+          <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">本月淨支出 (KRW)</span>
           <div id="totalDisplay" class="text-3xl font-black text-gray-900 mt-0.5">₩ 0</div>
         </div>
         <div class="text-right">
@@ -48,33 +48,59 @@
       </div>
     </section>
 
-    <!-- 新增支出表單 -->
+    <!-- 新增收支表單 -->
     <form id="addForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
-      <input id="itemTitle" type="text" placeholder="項目名稱 (如: 瓦斯費)" required class="flex-1 min-w-[150px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
       
-      <select id="itemCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
-        <option value="🏠 住家生活">🏠 住家生活</option>
-        <option value="💼 工作室">💼 工作室</option>
-        <option value="📺 個人訂閱">📺 個人訂閱</option>
-        <option value="📱 電信通訊">📱 電信通訊</option>
-        <option value="✨ 其他">✨ 其他</option>
+      <!-- 1. 收支類型 -->
+      <select id="itemType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <option value="支出">支出</option>
+        <option value="收入">收入</option>
       </select>
 
+      <!-- 2. 項目名稱 -->
+      <input id="itemTitle" type="text" placeholder="項目名稱 (如: 瓦斯費)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
+      
+      <!-- 3. 類別 -->
+      <select id="itemCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <option value="adorable">adorable</option>
+        <option value="固定支出">固定支出</option>
+        <option value="餐費">餐費</option>
+        <option value="咖啡廳">咖啡廳</option>
+        <option value="喝酒">喝酒</option>
+        <option value="交通">交通</option>
+        <option value="購物">購物</option>
+        <option value="娛樂">娛樂</option>
+        <option value="日用品">日用品</option>
+        <option value="買菜">買菜</option>
+        <option value="保養">保養</option>
+        <option value="玩樂">玩樂</option>
+      </select>
+
+      <!-- 4. 花費歸屬 -->
+      <select id="itemScope" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <option value="個人花費">個人花費</option>
+        <option value="家庭花費">家庭花費</option>
+        <option value="adorable 花費">adorable 花費</option>
+      </select>
+
+      <!-- 5. 金額 -->
       <input id="itemAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
 
+      <!-- 6. 幣別 -->
       <select id="itemCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
         <option value="KRW">₩ KRW</option>
         <option value="TWD">NT$ TWD</option>
       </select>
 
+      <!-- 7. 送出按鈕 -->
       <button id="submitBtn" type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition shadow-sm">
         同步送出
       </button>
     </form>
 
-    <!-- 支出分類清單 -->
+    <!-- 收支分類清單 -->
     <div id="listContainer" class="space-y-4">
-      <div class="text-center py-10 text-gray-400 text-sm">正在載入支出清單...</div>
+      <div class="text-center py-10 text-gray-400 text-sm">正在載入清單...</div>
     </div>
   </div>
 
@@ -130,17 +156,22 @@
 
       let totalKRW = 0;
 
-      // 計算總支出
+      // 計算淨支出 (支出增加、收入扣除)
       items.forEach(item => {
         const valInKRW = item.currency === 'TWD' ? item.amount * RATE_TWD_TO_KRW : Number(item.amount);
-        totalKRW += valInKRW;
+        if (item.type === '收入') {
+          totalKRW -= valInKRW;
+        } else {
+          totalKRW += valInKRW;
+        }
       });
 
       // 更新預算與進度條
+      const displayTotal = Math.max(0, totalKRW);
       document.getElementById('totalDisplay').innerText = `₩ ${Math.round(totalKRW).toLocaleString()}`;
       document.getElementById('budgetDisplay').innerText = `₩ ${Math.round(budget).toLocaleString()}`;
 
-      const percent = Math.round((totalKRW / budget) * 100);
+      const percent = Math.round((displayTotal / budget) * 100);
       const progressBar = document.getElementById('progressBar');
       const percentText = document.getElementById('percentText');
       const remainingText = document.getElementById('remainingText');
@@ -172,19 +203,26 @@
       }
 
       // 依分類渲染卡片
-      const categories = [...new Set(items.map(i => i.category))];
+      const categories = [...new Set(items.map(i => i.category || '未分類'))];
       categories.forEach(cat => {
-        const catItems = items.filter(i => i.category === cat);
+        const catItems = items.filter(i => (i.category || '未分類') === cat);
         const catCard = document.createElement('div');
         catCard.className = 'bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden';
         
         let catHtml = `<div class="bg-gray-50/70 px-5 py-3 font-bold text-xs uppercase tracking-wider text-gray-500 border-b border-gray-100">${cat}</div><div class="divide-y divide-gray-100">`;
 
         catItems.forEach(item => {
+          const isIncome = item.type === '收入';
           catHtml += `
             <div class="flex justify-between items-center px-5 py-3.5 hover:bg-gray-50/50 transition">
-              <span class="text-sm font-medium text-gray-800">${item.title}</span>
-              <span class="text-sm font-bold text-gray-900">${item.currency === 'KRW' ? '₩' : 'NT$'} ${Number(item.amount).toLocaleString()}</span>
+              <div class="flex items-center gap-2">
+                <span class="text-xs px-2 py-0.5 rounded-full ${isIncome ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} font-semibold">${item.type || '支出'}</span>
+                <span class="text-sm font-medium text-gray-800">${item.title}</span>
+                <span class="text-xs text-gray-400">(${item.scope || '個人花費'})</span>
+              </div>
+              <span class="text-sm font-bold ${isIncome ? 'text-emerald-600' : 'text-gray-900'}">
+                ${isIncome ? '+' : ''}${item.currency === 'KRW' ? '₩' : 'NT$'} ${Number(item.amount).toLocaleString()}
+              </span>
             </div>`;
         });
 
@@ -201,8 +239,10 @@
       submitBtn.innerText = "寫入中...";
 
       const newItem = {
+        type: document.getElementById('itemType').value,
         title: document.getElementById('itemTitle').value,
         category: document.getElementById('itemCategory').value,
+        scope: document.getElementById('itemScope').value,
         amount: Number(document.getElementById('itemAmount').value),
         currency: document.getElementById('itemCurrency').value
       };
