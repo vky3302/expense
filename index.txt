@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>固定支出與預算管理助手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen p-4 md:p-8">
+  <div class="max-w-3xl mx-auto space-y-6">
+    
+    <!-- 頂部標題與狀態 -->
+    <header class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">📊 固定支出與預算助手</h1>
+        <div class="flex items-center gap-2 mt-1">
+          <span id="syncStatus" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span id="syncText" class="text-xs text-gray-500">已連線至 Google Sheets</span>
+        </div>
+      </div>
+      <button onclick="editBudget()" class="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition">
+        ⚙️ 設定月預算
+      </button>
+    </header>
+
+    <!-- 💡 預算進度卡片 -->
+    <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+      <div class="flex justify-between items-end">
+        <div>
+          <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">本月支出預估 (KRW)</span>
+          <div id="totalDisplay" class="text-3xl font-black text-gray-900 mt-0.5">₩ 0</div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-medium text-gray-400">月預算上限</span>
+          <div id="budgetDisplay" class="text-lg font-bold text-gray-700">₩ 1,000,000</div>
+        </div>
+      </div>
+
+      <!-- 進度條主體 -->
+      <div class="w-full bg-gray-100 rounded-full h-3.5 overflow-hidden p-0.5">
+        <div id="progressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+      </div>
+
+      <!-- 進度與剩餘提示 -->
+      <div class="flex justify-between items-center text-xs font-medium text-gray-500 pt-1">
+        <span id="percentText">已使用 0%</span>
+        <span id="remainingText" class="text-emerald-600 font-semibold">剩餘額度: ₩ 0</span>
+      </div>
+    </section>
+
+    <!-- 新增支出表單 -->
+    <form id="addForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
+      <input id="itemTitle" type="text" placeholder="項目名稱 (如: 瓦斯費)" required class="flex-1 min-w-[150px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
+      
+      <select id="itemCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <option value="🏠 住家生活">🏠 住家生活</option>
+        <option value="💼 工作室">💼 工作室</option>
+        <option value="📺 個人訂閱">📺 個人訂閱</option>
+        <option value="📱 電信通訊">📱 電信通訊</option>
+        <option value="✨ 其他">✨ 其他</option>
+      </select>
+
+      <input id="itemAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
+
+      <select id="itemCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <option value="KRW">₩ KRW</option>
+        <option value="TWD">NT$ TWD</option>
+      </select>
+
+      <button id="submitBtn" type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition shadow-sm">
+        同步送出
+      </button>
+    </form>
+
+    <!-- 支出分類清單 -->
+    <div id="listContainer" class="space-y-4">
+      <div class="text-center py-10 text-gray-400 text-sm">正在載入支出清單...</div>
+    </div>
+  </div>
+
+  <script>
+    // ⚠️ 請替換為您部署 Apps Script 後取得的 Web App URL
+    const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+    const RATE_TWD_TO_KRW = 42.5;
+
+    let budget = Number(localStorage.getItem('my_monthly_budget')) || 1000000;
+    let items = [];
+
+    // 修改預算上限
+    function editBudget() {
+      const input = prompt("請輸入每月預算上限 (KRW):", budget);
+      if (input !== null && !isNaN(input) && Number(input) > 0) {
+        budget = Number(input);
+        localStorage.setItem('my_monthly_budget', budget);
+        render();
+      }
+    }
+
+    async function fetchFromGoogleSheets() {
+      if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
+        items = JSON.parse(localStorage.getItem('my_expenses')) || [];
+        render();
+        updateStatus("⚠️ 未設定 Apps Script 網址 (本機模式)", "bg-amber-400");
+        return;
+      }
+
+      updateStatus("同步中...", "bg-blue-400");
+      try {
+        const res = await fetch(GOOGLE_SCRIPT_URL);
+        items = await res.json();
+        render();
+        updateStatus("已與 Google Sheets 同步", "bg-emerald-500");
+      } catch (e) {
+        console.error("載入失敗:", e);
+        updateStatus("同步失敗，顯示快取資料", "bg-rose-500");
+        items = JSON.parse(localStorage.getItem('my_expenses')) || [];
+        render();
+      }
+    }
+
+    function updateStatus(text, colorClass) {
+      document.getElementById('syncText').innerText = text;
+      document.getElementById('syncStatus').className = `inline-block w-2.5 h-2.5 rounded-full ${colorClass}`;
+    }
+
+    function render() {
+      localStorage.setItem('my_expenses', JSON.stringify(items));
+      const container = document.getElementById('listContainer');
+      container.innerHTML = '';
+
+      let totalKRW = 0;
+
+      // 計算總支出
+      items.forEach(item => {
+        const valInKRW = item.currency === 'TWD' ? item.amount * RATE_TWD_TO_KRW : Number(item.amount);
+        totalKRW += valInKRW;
+      });
+
+      // 更新預算與進度條
+      document.getElementById('totalDisplay').innerText = `₩ ${Math.round(totalKRW).toLocaleString()}`;
+      document.getElementById('budgetDisplay').innerText = `₩ ${Math.round(budget).toLocaleString()}`;
+
+      const percent = Math.round((totalKRW / budget) * 100);
+      const progressBar = document.getElementById('progressBar');
+      const percentText = document.getElementById('percentText');
+      const remainingText = document.getElementById('remainingText');
+
+      progressBar.style.width = `${Math.min(percent, 100)}%`;
+      percentText.innerText = `已使用 ${percent}%`;
+
+      const remaining = budget - totalKRW;
+      if (remaining >= 0) {
+        remainingText.innerText = `剩餘額度: ₩ ${Math.round(remaining).toLocaleString()}`;
+        remainingText.className = "text-emerald-600 font-semibold";
+      } else {
+        remainingText.innerText = `⚠️ 已超支: ₩ ${Math.round(Math.abs(remaining)).toLocaleString()}`;
+        remainingText.className = "text-rose-600 font-bold";
+      }
+
+      // 根據百分比動態變更進度條顏色
+      if (percent < 75) {
+        progressBar.className = "bg-emerald-500 h-full rounded-full transition-all duration-500";
+      } else if (percent < 100) {
+        progressBar.className = "bg-amber-500 h-full rounded-full transition-all duration-500";
+      } else {
+        progressBar.className = "bg-rose-500 h-full rounded-full transition-all duration-500";
+      }
+
+      if (items.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-gray-400 text-sm bg-white rounded-2xl border border-gray-100">目前尚無記錄，快新增一筆吧！</div>';
+        return;
+      }
+
+      // 依分類渲染卡片
+      const categories = [...new Set(items.map(i => i.category))];
+      categories.forEach(cat => {
+        const catItems = items.filter(i => i.category === cat);
+        const catCard = document.createElement('div');
+        catCard.className = 'bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden';
+        
+        let catHtml = `<div class="bg-gray-50/70 px-5 py-3 font-bold text-xs uppercase tracking-wider text-gray-500 border-b border-gray-100">${cat}</div><div class="divide-y divide-gray-100">`;
+
+        catItems.forEach(item => {
+          catHtml += `
+            <div class="flex justify-between items-center px-5 py-3.5 hover:bg-gray-50/50 transition">
+              <span class="text-sm font-medium text-gray-800">${item.title}</span>
+              <span class="text-sm font-bold text-gray-900">${item.currency === 'KRW' ? '₩' : 'NT$'} ${Number(item.amount).toLocaleString()}</span>
+            </div>`;
+        });
+
+        catHtml += `</div>`;
+        catCard.innerHTML = catHtml;
+        container.appendChild(catCard);
+      });
+    }
+
+    document.getElementById('addForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "寫入中...";
+
+      const newItem = {
+        title: document.getElementById('itemTitle').value,
+        category: document.getElementById('itemCategory').value,
+        amount: Number(document.getElementById('itemAmount').value),
+        currency: document.getElementById('itemCurrency').value
+      };
+
+      items.push(newItem);
+      render();
+
+      if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
+        try {
+          await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newItem)
+          });
+          updateStatus("寫入成功！", "bg-emerald-500");
+        } catch (err) {
+          console.error("寫入失敗:", err);
+          updateStatus("寫入失敗", "bg-rose-500");
+        }
+      }
+
+      document.getElementById('itemTitle').value = '';
+      document.getElementById('itemAmount').value = '';
+      submitBtn.disabled = false;
+      submitBtn.innerText = "同步送出";
+    });
+
+    fetchFromGoogleSheets();
+  </script>
+</body>
+</html>
