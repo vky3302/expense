@@ -317,7 +317,7 @@
           <input type="text" id="formNote" placeholder="項目名稱 (選填)" />
           <select id="formSubCategory"></select>
           
-          <!-- 對象選單：在 Wedding 分頁時會自動隱藏 -->
+          <!-- 對象選單：在 Adorable 與 Wedding 時會自動隱藏 -->
           <select id="formOwner">
             <option value="mu (個人)">mu (個人)</option>
             <option value="mu&jun (家庭)">mu&jun (家庭)</option>
@@ -346,7 +346,7 @@
     let currentTab = 'life';
     let allRecords = [];
 
-    // 各大類別的細項
+    // 各分頁子細項
     const subCategories = {
       life: ['固定支出', '餐費', '咖啡廳', '喝酒', '交通', '購物', '娛樂', '日用品', '買菜', '保養', '玩樂', '房租', '電費', '水費', '電信費'],
       adorable: ['工作室房租', '進貨成本', '包材耗材', '國際運費', '包裹稅金', '廣告行銷', '網拍收入', '小禮物', '薪水', '稅金'],
@@ -372,14 +372,14 @@
       updateSummary();
     }
 
-    // 控制 Wedding 是否顯示 mu/jun 對象選單
+    // 控制 Adorable 與 Wedding 隱藏對象選單
     function toggleOwnerVisibility() {
       const ownerSelect = document.getElementById('formOwner');
       const submitBtn = document.getElementById('btnSubmit');
 
-      if (currentTab === 'wedding') {
+      if (currentTab === 'wedding' || currentTab === 'adorable') {
         ownerSelect.style.display = 'none';
-        submitBtn.style.gridColumn = 'span 2'; // 填補隱藏後的空白格
+        submitBtn.style.gridColumn = 'span 2';
       } else {
         ownerSelect.style.display = 'block';
         submitBtn.style.gridColumn = 'auto';
@@ -397,7 +397,7 @@
       });
     }
 
-    // 將各種日期字串轉為 M/D 格式 (例如: "2026-08-10" 或 GMT 日期字串 -> "8/10")
+    // 格式化為 M/D (例: 8/10)
     function formatShortDate(dateVal) {
       if (!dateVal) return '';
       const d = new Date(dateVal);
@@ -424,7 +424,7 @@
       }
     }
 
-    // 渲染清單
+    // 渲染明細清單
     function renderRecords() {
       const container = document.getElementById('recordsContainer');
       container.innerHTML = '';
@@ -441,8 +441,10 @@
         item.className = 'record-item';
 
         const shortDate = formatShortDate(r.date);
-        // Wedding 分頁不顯示對象標籤
-        const ownerTag = (currentTab === 'wedding' || !r.owner) ? '' : `<span class="record-owner">(${r.owner})</span>`;
+        
+        // Adorable 和 Wedding 不顯示 (mu) 或 (mu&jun)
+        const hideOwner = (currentTab === 'wedding' || currentTab === 'adorable' || !r.owner || r.owner === 'adorable' || r.owner === 'wedding');
+        const ownerTag = hideOwner ? '' : `<span class="record-owner">(${r.owner})</span>`;
 
         item.innerHTML = `
           <div class="record-left">
@@ -489,6 +491,10 @@
     async function handleSubmit(e) {
       e.preventDefault();
 
+      let ownerVal = document.getElementById('formOwner').value;
+      if (currentTab === 'wedding') ownerVal = 'wedding';
+      if (currentTab === 'adorable') ownerVal = 'adorable';
+
       const newRecord = {
         action: 'add',
         id: 'id_' + new Date().getTime(),
@@ -497,7 +503,7 @@
         type: document.getElementById('formType').value,
         note: document.getElementById('formNote').value,
         subCategory: document.getElementById('formSubCategory').value,
-        owner: currentTab === 'wedding' ? 'wedding' : document.getElementById('formOwner').value,
+        owner: ownerVal,
         amount: Number(document.getElementById('formAmount').value),
         currency: document.getElementById('formCurrency').value
       };
