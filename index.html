@@ -19,32 +19,47 @@
         </div>
       </div>
       <button onclick="editBudget()" class="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition">
-        ⚙️ 設定月預算
+        ⚙️ 設定月預算 (KRW)
       </button>
     </header>
 
-    <!-- 💡 預算進度卡片 -->
-    <section class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-      <div class="flex justify-between items-end">
+    <!-- 💡 雙幣別收支總覽卡片 (分開顯示 KRW 與 TWD) -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- KRW 韓幣統計與進度 -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+        <div class="flex justify-between items-end">
+          <div>
+            <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wider">韓幣 (KRW) 淨支出</span>
+            <div id="krwTotalDisplay" class="text-2xl font-black text-gray-900 mt-0.5">₩ 0</div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-medium text-gray-400">月預算上限</span>
+            <div id="budgetDisplay" class="text-sm font-bold text-gray-700">₩ 1,000,000</div>
+          </div>
+        </div>
+
+        <!-- KRW 進度條 -->
+        <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden p-0.5">
+          <div id="progressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+
+        <!-- 進度與剩餘提示 -->
+        <div class="flex justify-between items-center text-xs font-medium text-gray-500">
+          <span id="percentText">已使用 0%</span>
+          <span id="remainingText" class="text-emerald-600 font-semibold">剩餘: ₩ 1,000,000</span>
+        </div>
+      </div>
+
+      <!-- TWD 台幣統計 -->
+      <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
         <div>
-          <span class="text-xs font-medium text-gray-400 uppercase tracking-wider">本月淨支出 (KRW)</span>
-          <div id="totalDisplay" class="text-3xl font-black text-gray-900 mt-0.5">₩ 0</div>
+          <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">台幣 (TWD) 淨支出</span>
+          <div id="twdTotalDisplay" class="text-2xl font-black text-gray-900 mt-0.5">NT$ 0</div>
         </div>
-        <div class="text-right">
-          <span class="text-xs font-medium text-gray-400">月預算上限</span>
-          <div id="budgetDisplay" class="text-lg font-bold text-gray-700">₩ 1,000,000</div>
+        <div class="flex justify-between items-center text-xs text-gray-500 pt-4 border-t border-gray-50 mt-4">
+          <span>總收入: <span id="twdIncomeDisplay" class="font-bold text-emerald-600">NT$ 0</span></span>
+          <span>總支出: <span id="twdExpenseDisplay" class="font-bold text-rose-600">NT$ 0</span></span>
         </div>
-      </div>
-
-      <!-- 進度條主體 -->
-      <div class="w-full bg-gray-100 rounded-full h-3.5 overflow-hidden p-0.5">
-        <div id="progressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
-      </div>
-
-      <!-- 進度與剩餘提示 -->
-      <div class="flex justify-between items-center text-xs font-medium text-gray-500 pt-1">
-        <span id="percentText">已使用 0%</span>
-        <span id="remainingText" class="text-emerald-600 font-semibold">剩餘額度: ₩ 0</span>
       </div>
     </section>
 
@@ -74,6 +89,10 @@
         <option value="買菜">買菜</option>
         <option value="保養">保養</option>
         <option value="玩樂">玩樂</option>
+        <option value="房租">房租</option>
+        <option value="電費">電費</option>
+        <option value="水費">水費</option>
+        <option value="電信費">電信費</option>
       </select>
 
       <!-- 4. 花費歸屬 -->
@@ -107,12 +126,11 @@
   <script>
     // ⚠️ 請替換為您部署 Apps Script 後取得的 Web App URL
     const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
-    const RATE_TWD_TO_KRW = 42.5;
 
     let budget = Number(localStorage.getItem('my_monthly_budget')) || 1000000;
     let items = [];
 
-    // 修改預算上限
+    // 修改預算上限 (KRW)
     function editBudget() {
       const input = prompt("請輸入每月預算上限 (KRW):", budget);
       if (input !== null && !isNaN(input) && Number(input) > 0) {
@@ -154,24 +172,31 @@
       const container = document.getElementById('listContainer');
       container.innerHTML = '';
 
-      let totalKRW = 0;
+      let krwExpense = 0, krwIncome = 0;
+      let twdExpense = 0, twdIncome = 0;
 
-      // 計算淨支出 (支出增加、收入扣除)
+      // 分開計算 KRW 與 TWD
       items.forEach(item => {
-        const valInKRW = item.currency === 'TWD' ? item.amount * RATE_TWD_TO_KRW : Number(item.amount);
-        if (item.type === '收入') {
-          totalKRW -= valInKRW;
-        } else {
-          totalKRW += valInKRW;
+        const amt = Number(item.amount) || 0;
+        const isIncome = item.type === '收入';
+
+        if (item.currency === 'KRW') {
+          if (isIncome) krwIncome += amt;
+          else krwExpense += amt;
+        } else if (item.currency === 'TWD') {
+          if (isIncome) twdIncome += amt;
+          else twdExpense += amt;
         }
       });
 
-      // 更新預算與進度條
-      const displayTotal = Math.max(0, totalKRW);
-      document.getElementById('totalDisplay').innerText = `₩ ${Math.round(totalKRW).toLocaleString()}`;
+      const krwNet = krwExpense - krwIncome;
+      const twdNet = twdExpense - twdIncome;
+
+      // 更新 KRW 統計與進度條
+      document.getElementById('krwTotalDisplay').innerText = `₩ ${Math.round(krwNet).toLocaleString()}`;
       document.getElementById('budgetDisplay').innerText = `₩ ${Math.round(budget).toLocaleString()}`;
 
-      const percent = Math.round((displayTotal / budget) * 100);
+      const percent = Math.round((Math.max(0, krwNet) / budget) * 100);
       const progressBar = document.getElementById('progressBar');
       const percentText = document.getElementById('percentText');
       const remainingText = document.getElementById('remainingText');
@@ -179,16 +204,16 @@
       progressBar.style.width = `${Math.min(percent, 100)}%`;
       percentText.innerText = `已使用 ${percent}%`;
 
-      const remaining = budget - totalKRW;
-      if (remaining >= 0) {
-        remainingText.innerText = `剩餘額度: ₩ ${Math.round(remaining).toLocaleString()}`;
+      const remainingKRW = budget - krwNet;
+      if (remainingKRW >= 0) {
+        remainingText.innerText = `剩餘: ₩ ${Math.round(remainingKRW).toLocaleString()}`;
         remainingText.className = "text-emerald-600 font-semibold";
       } else {
-        remainingText.innerText = `⚠️ 已超支: ₩ ${Math.round(Math.abs(remaining)).toLocaleString()}`;
+        remainingText.innerText = `⚠️ 已超支: ₩ ${Math.round(Math.abs(remainingKRW)).toLocaleString()}`;
         remainingText.className = "text-rose-600 font-bold";
       }
 
-      // 根據百分比動態變更進度條顏色
+      // 進度條顏色
       if (percent < 75) {
         progressBar.className = "bg-emerald-500 h-full rounded-full transition-all duration-500";
       } else if (percent < 100) {
@@ -196,6 +221,11 @@
       } else {
         progressBar.className = "bg-rose-500 h-full rounded-full transition-all duration-500";
       }
+
+      // 更新 TWD 統計
+      document.getElementById('twdTotalDisplay').innerText = `NT$ ${Math.round(twdNet).toLocaleString()}`;
+      document.getElementById('twdIncomeDisplay').innerText = `NT$ ${Math.round(twdIncome).toLocaleString()}`;
+      document.getElementById('twdExpenseDisplay').innerText = `NT$ ${Math.round(twdExpense).toLocaleString()}`;
 
       if (items.length === 0) {
         container.innerHTML = '<div class="text-center py-12 text-gray-400 text-sm bg-white rounded-2xl border border-gray-100">目前尚無記錄，快新增一筆吧！</div>';
@@ -218,7 +248,7 @@
               <div class="flex items-center gap-2">
                 <span class="text-xs px-2 py-0.5 rounded-full ${isIncome ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} font-semibold">${item.type || '支出'}</span>
                 <span class="text-sm font-medium text-gray-800">${item.title}</span>
-                <span class="text-xs text-gray-400">(${item.scope || '個人花費'})</span>
+                <span class="text-xs text-gray-400">(${item.scope || 'mu'})</span>
               </div>
               <span class="text-sm font-bold ${isIncome ? 'text-emerald-600' : 'text-gray-900'}">
                 ${isIncome ? '+' : ''}${item.currency === 'KRW' ? '₩' : 'NT$'} ${Number(item.amount).toLocaleString()}
