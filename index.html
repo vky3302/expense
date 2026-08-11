@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>記帳與資產管理📝</title>
+  <title>多功能記帳與資產助手📝</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 min-h-screen p-4 md:p-8">
@@ -12,21 +12,24 @@
     <!-- 頂部標題與狀態 -->
     <header class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">記帳與資產管理📝</h1>
+        <h1 class="text-2xl font-bold text-gray-900">記帳助手📝</h1>
         <div class="flex items-center gap-2 mt-1">
           <span id="syncStatus" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           <span id="syncText" class="text-xs text-gray-500">已連線至 Google Sheets</span>
         </div>
       </div>
       <button id="budgetBtn" onclick="editBudget()" class="text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition">
-        ⚙️ 設定月預算 (KRW)
+        ⚙️ 設定生活預算 (KRW)
       </button>
     </header>
 
-    <!-- 🌟 分頁切換頁籤 (Tabs) -->
-    <div class="flex bg-gray-200/70 p-1 rounded-2xl">
-      <button id="tabExpenseBtn" onclick="switchTab('expense')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition bg-white text-indigo-600 shadow-sm">
-        📊 日常記帳
+    <!-- 🌟 三分頁切換頁籤 -->
+    <div class="flex bg-gray-200/70 p-1 rounded-2xl gap-1">
+      <button id="tabPersonalBtn" onclick="switchTab('personal')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition bg-white text-indigo-600 shadow-sm">
+        🏠 個人/生活
+      </button>
+      <button id="tabShopBtn" onclick="switchTab('shop')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800">
+        🛍️ Adorable 網拍
       </button>
       <button id="tabInvestBtn" onclick="switchTab('invest')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800">
         📈 投資資產
@@ -34,38 +37,35 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 1️⃣ 日常記帳 頁面內容 -->
+    <!-- 1️⃣ 個人/生活日常記帳 -->
     <!-- ========================================== -->
-    <div id="expenseView" class="space-y-6">
-      <!-- 雙幣別收支總覽卡片 -->
+    <div id="personalView" class="space-y-6">
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- KRW 韓幣統計與進度 -->
+        <!-- KRW 生活預算 -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
           <div class="flex justify-between items-end">
             <div>
-              <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wider">韓幣 (KRW) 淨支出</span>
+              <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wider">韓幣 (KRW) 生活淨支出</span>
               <div id="krwTotalDisplay" class="text-2xl font-black text-gray-900 mt-0.5">₩ 0</div>
             </div>
             <div class="text-right">
-              <span class="text-xs font-medium text-gray-400">月預算上限</span>
+              <span class="text-xs font-medium text-gray-400">生活預算上限</span>
               <div id="budgetDisplay" class="text-sm font-bold text-gray-700">₩ 1,000,000</div>
             </div>
           </div>
-
           <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden p-0.5">
             <div id="progressBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
           </div>
-
           <div class="flex justify-between items-center text-xs font-medium text-gray-500">
             <span id="percentText">已使用 0%</span>
             <span id="remainingText" class="text-emerald-600 font-semibold">剩餘: ₩ 1,000,000</span>
           </div>
         </div>
 
-        <!-- TWD 台幣統計 -->
+        <!-- TWD 生活收支 -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
           <div>
-            <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">台幣 (TWD) 淨支出</span>
+            <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">台幣 (TWD) 生活淨支出</span>
             <div id="twdTotalDisplay" class="text-2xl font-black text-gray-900 mt-0.5">NT$ 0</div>
           </div>
           <div class="flex justify-between items-center text-xs text-gray-500 pt-4 border-t border-gray-50 mt-4">
@@ -75,19 +75,15 @@
         </div>
       </section>
 
-      <!-- 新增日常記帳表單 -->
-      <form id="addExpenseForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
-        <input id="itemDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
-
-        <select id="itemType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+      <!-- 個人表單 -->
+      <form id="addPersonalForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
+        <input id="pDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
+        <select id="pType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="支出">支出</option>
           <option value="收入">收入</option>
         </select>
-
-        <input id="itemTitle" type="text" placeholder="項目名稱 (如: 瓦斯費)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
-        
-        <select id="itemCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
-          <option value="adorable">adorable</option>
+        <input id="pTitle" type="text" placeholder="項目名稱 (如: 買菜)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
+        <select id="pCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="固定支出">固定支出</option>
           <option value="餐費">餐費</option>
           <option value="咖啡廳">咖啡廳</option>
@@ -104,91 +100,122 @@
           <option value="水費">水費</option>
           <option value="電信費">電信費</option>
         </select>
-
-        <select id="itemScope" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
-          <option value="mu">mu</option>
-          <option value="mu&jun">mu&jun</option>
-          <option value="adorable">adorable</option>
+        <select id="pScope" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+          <option value="mu">mu (個人)</option>
+          <option value="mu&jun">mu&jun (家庭)</option>
         </select>
-
-        <input id="itemAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
-
-        <select id="itemCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <input id="pAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
+        <select id="pCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="KRW">₩ KRW</option>
           <option value="TWD">NT$ TWD</option>
         </select>
-
-        <button id="submitExpenseBtn" type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition shadow-sm">
+        <button id="pSubmitBtn" type="submit" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 active:scale-95 transition shadow-sm">
           同步送出
         </button>
       </form>
 
-      <!-- 日常收支清單 -->
-      <div id="expenseListContainer" class="space-y-4">
-        <div class="text-center py-10 text-gray-400 text-sm">正在載入清單...</div>
-      </div>
+      <div id="personalListContainer" class="space-y-4"></div>
     </div>
 
     <!-- ========================================== -->
-    <!-- 2️⃣ 投資資產 頁面內容 (預設隱藏) -->
+    <!-- 2️⃣ Adorable 網拍營運記帳 (預設隱藏) -->
     <!-- ========================================== -->
-    <div id="investView" class="space-y-6 hidden">
-      <!-- 投資資產總覽卡片 -->
+    <div id="shopView" class="space-y-6 hidden">
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-1">
-          <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">韓幣 (KRW) 累積投資</span>
-          <div id="investKrwTotal" class="text-3xl font-black text-gray-900 mt-1">₩ 0</div>
-          <p class="text-xs text-gray-400 pt-2">包含股票、基金、定期定額投入本金</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <span class="text-xs font-semibold text-rose-600 uppercase tracking-wider">韓幣 (KRW) 網拍淨利潤</span>
+          <div id="shopKrwNet" class="text-2xl font-black text-gray-900 mt-1">₩ 0</div>
+          <div class="flex justify-between items-center text-xs text-gray-500 pt-3 mt-3 border-t border-gray-50">
+            <span>營業額: <span id="shopKrwIncome" class="font-bold text-emerald-600">₩ 0</span></span>
+            <span>總營運成本: <span id="shopKrwExpense" class="font-bold text-rose-600">₩ 0</span></span>
+          </div>
         </div>
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-1">
-          <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">台幣 (TWD) 累積投資</span>
-          <div id="investTwdTotal" class="text-3xl font-black text-gray-900 mt-1">NT$ 0</div>
-          <p class="text-xs text-gray-400 pt-2">包含股票、ETF、儲蓄險投入本金</p>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <span class="text-xs font-semibold text-rose-600 uppercase tracking-wider">台幣 (TWD) 網拍淨利潤</span>
+          <div id="shopTwdNet" class="text-2xl font-black text-gray-900 mt-1">NT$ 0</div>
+          <div class="flex justify-between items-center text-xs text-gray-500 pt-3 mt-3 border-t border-gray-50">
+            <span>營業額: <span id="shopTwdIncome" class="font-bold text-emerald-600">NT$ 0</span></span>
+            <span>總營運成本: <span id="shopTwdExpense" class="font-bold text-rose-600">NT$ 0</span></span>
+          </div>
         </div>
       </section>
 
-      <!-- 新增投資紀錄表單 -->
-      <form id="addInvestForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
-        <input id="investDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
+      <!-- 網拍表單 -->
+      <form id="addShopForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
+        <input id="sDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-rose-400 transition" />
+        <select id="sType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+          <option value="支出">支出 (成本/開銷)</option>
+          <option value="收入">收入 (營業額/訂單)</option>
+        </select>
+        <input id="sTitle" type="text" placeholder="項目名稱 (如: 檔口進貨、工作室房租)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-rose-400 transition" />
+        <select id="sCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+          <option value="進貨成本">進貨成本</option>
+          <option value="工作室房租">工作室房租</option>
+          <option value="包材耗材">包材耗材</option>
+          <option value="國際運費/快遞">國際運費/快遞</option>
+          <option value="廣告/行銷">廣告/行銷</option>
+          <option value="網拍收入">網拍收入</option>
+          <option value="其他營運">其他營運</option>
+        </select>
+        <input id="sAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-rose-400 transition" />
+        <select id="sCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+          <option value="KRW">₩ KRW</option>
+          <option value="TWD">NT$ TWD</option>
+        </select>
+        <button id="sSubmitBtn" type="submit" class="bg-rose-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-rose-700 active:scale-95 transition shadow-sm">
+          同步送出
+        </button>
+      </form>
 
-        <select id="investType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+      <div id="shopListContainer" class="space-y-4"></div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3️⃣ 投資資產 (預設隱藏) -->
+    <!-- ========================================== -->
+    <div id="investView" class="space-y-6 hidden">
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">韓幣 (KRW) 累積投資</span>
+          <div id="investKrwTotal" class="text-2xl font-black text-gray-900 mt-1">₩ 0</div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">台幣 (TWD) 累積投資</span>
+          <div id="investTwdTotal" class="text-2xl font-black text-gray-900 mt-1">NT$ 0</div>
+        </div>
+      </section>
+
+      <!-- 投資表單 -->
+      <form id="addInvestForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
+        <input id="iDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
+        <select id="iType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="買入/定期定額">買入 / 定期定額</option>
           <option value="賣出/贖回">賣出 / 贖回</option>
           <option value="配息/股利">配息 / 股利</option>
         </select>
-
-        <input id="investTitle" type="text" placeholder="標的名稱 (如: 0050, 美股ETF)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
-        
-        <select id="investCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <input id="iTitle" type="text" placeholder="標的名稱 (如: 0050, 美股ETF)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
+        <select id="iCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="ETF/基金">ETF / 基金</option>
           <option value="個股">個股</option>
           <option value="加密貨幣">加密貨幣</option>
           <option value="定期儲蓄">定期儲蓄</option>
           <option value="其他投資">其他投資</option>
         </select>
-
-        <select id="investScope" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <select id="iScope" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="mu">mu</option>
           <option value="mu&jun">mu&jun</option>
-          <option value="adorable">adorable</option>
         </select>
-
-        <input id="investAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
-
-        <select id="investCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
+        <input id="iAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
+        <select id="iCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="KRW">₩ KRW</option>
           <option value="TWD">NT$ TWD</option>
         </select>
-
-        <button id="submitInvestBtn" type="submit" class="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 active:scale-95 transition shadow-sm">
+        <button id="iSubmitBtn" type="submit" class="bg-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-700 active:scale-95 transition shadow-sm">
           同步送出
         </button>
       </form>
 
-      <!-- 投資紀錄清單 -->
-      <div id="investListContainer" class="space-y-4">
-        <div class="text-center py-10 text-gray-400 text-sm">正在載入投資清單...</div>
-      </div>
+      <div id="investListContainer" class="space-y-4"></div>
     </div>
 
   </div>
@@ -197,56 +224,45 @@
     // ⚠️ 請填入您的 Apps Script Web App 網址
     const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
-    let currentTab = 'expense';
     let budget = Number(localStorage.getItem('my_monthly_budget')) || 1000000;
-    let expenseItems = [];
+    let personalItems = [];
+    let shopItems = [];
     let investItems = [];
 
-    // 切換頁籤
     function switchTab(tab) {
-      currentTab = tab;
-      const expenseView = document.getElementById('expenseView');
-      const investView = document.getElementById('investView');
-      const tabExpenseBtn = document.getElementById('tabExpenseBtn');
-      const tabInvestBtn = document.getElementById('tabInvestBtn');
-      const budgetBtn = document.getElementById('budgetBtn');
+      document.getElementById('personalView').classList.toggle('hidden', tab !== 'personal');
+      document.getElementById('shopView').classList.toggle('hidden', tab !== 'shop');
+      document.getElementById('investView').classList.toggle('hidden', tab !== 'invest');
 
-      if (tab === 'expense') {
-        expenseView.classList.remove('hidden');
-        investView.classList.add('hidden');
-        tabExpenseBtn.className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition bg-white text-indigo-600 shadow-sm";
-        tabInvestBtn.className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800";
-        budgetBtn.classList.remove('hidden');
-      } else {
-        expenseView.classList.add('hidden');
-        investView.classList.remove('hidden');
-        tabInvestBtn.className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition bg-white text-purple-600 shadow-sm";
-        tabExpenseBtn.className = "flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800";
-        budgetBtn.classList.add('hidden');
-      }
+      document.getElementById('tabPersonalBtn').className = tab === 'personal' ? "flex-1 py-2.5 text-sm font-bold rounded-xl transition bg-white text-indigo-600 shadow-sm" : "flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800";
+      document.getElementById('tabShopBtn').className = tab === 'shop' ? "flex-1 py-2.5 text-sm font-bold rounded-xl transition bg-white text-rose-600 shadow-sm" : "flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800";
+      document.getElementById('tabInvestBtn').className = tab === 'invest' ? "flex-1 py-2.5 text-sm font-bold rounded-xl transition bg-white text-purple-600 shadow-sm" : "flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800";
+
+      document.getElementById('budgetBtn').classList.toggle('hidden', tab !== 'personal');
     }
 
     function setTodayDates() {
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('itemDate').value = today;
-      document.getElementById('investDate').value = today;
+      document.getElementById('pDate').value = today;
+      document.getElementById('sDate').value = today;
+      document.getElementById('iDate').value = today;
     }
 
     function editBudget() {
-      const input = prompt("請輸入每月預算上限 (KRW):", budget);
+      const input = prompt("請輸入生活每月預算上限 (KRW):", budget);
       if (input !== null && !isNaN(input) && Number(input) > 0) {
         budget = Number(input);
         localStorage.setItem('my_monthly_budget', budget);
-        renderExpense();
+        renderPersonal();
       }
     }
 
     async function fetchAllData() {
       if (GOOGLE_SCRIPT_URL === "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
-        expenseItems = JSON.parse(localStorage.getItem('my_expenses')) || [];
-        investItems = JSON.parse(localStorage.getItem('my_investments')) || [];
-        renderExpense();
-        renderInvest();
+        personalItems = JSON.parse(localStorage.getItem('my_personal_exp')) || [];
+        shopItems = JSON.parse(localStorage.getItem('my_shop_exp')) || [];
+        investItems = JSON.parse(localStorage.getItem('my_invest_exp')) || [];
+        renderAll();
         updateStatus("⚠️ 未設定 Apps Script 網址 (本機模式)", "bg-amber-400");
         return;
       }
@@ -255,18 +271,17 @@
       try {
         const res = await fetch(GOOGLE_SCRIPT_URL);
         const data = await res.json();
-        expenseItems = data.expenses || [];
-        investItems = data.investments || [];
-        renderExpense();
-        renderInvest();
+        personalItems = data.personal || [];
+        shopItems = data.shop || [];
+        investItems = data.invest || [];
+        renderAll();
         updateStatus("已與 Google Sheets 同步", "bg-emerald-500");
       } catch (e) {
-        console.error("載入失敗:", e);
         updateStatus("同步失敗，顯示快取資料", "bg-rose-500");
-        expenseItems = JSON.parse(localStorage.getItem('my_expenses')) || [];
-        investItems = JSON.parse(localStorage.getItem('my_investments')) || [];
-        renderExpense();
-        renderInvest();
+        personalItems = JSON.parse(localStorage.getItem('my_personal_exp')) || [];
+        shopItems = JSON.parse(localStorage.getItem('my_shop_exp')) || [];
+        investItems = JSON.parse(localStorage.getItem('my_invest_exp')) || [];
+        renderAll();
       }
     }
 
@@ -275,211 +290,219 @@
       document.getElementById('syncStatus').className = `inline-block w-2.5 h-2.5 rounded-full ${colorClass}`;
     }
 
-    // 渲染日常記帳
-    function renderExpense() {
-      localStorage.setItem('my_expenses', JSON.stringify(expenseItems));
-      const container = document.getElementById('expenseListContainer');
+    function renderAll() {
+      renderPersonal();
+      renderShop();
+      renderInvest();
+    }
+
+    // 1. 渲染生活
+    function renderPersonal() {
+      localStorage.setItem('my_personal_exp', JSON.stringify(personalItems));
+      const container = document.getElementById('personalListContainer');
       container.innerHTML = '';
 
-      let krwExpense = 0, krwIncome = 0;
-      let twdExpense = 0, twdIncome = 0;
-
-      expenseItems.forEach(item => {
-        const amt = Number(item.amount) || 0;
-        const isIncome = item.type === '收入';
-        if (item.currency === 'KRW') {
-          if (isIncome) krwIncome += amt;
-          else krwExpense += amt;
-        } else if (item.currency === 'TWD') {
-          if (isIncome) twdIncome += amt;
-          else twdExpense += amt;
+      let krwNet = 0, twdExp = 0, twdInc = 0;
+      personalItems.forEach(i => {
+        const amt = Number(i.amount) || 0;
+        if (i.currency === 'KRW') krwNet += (i.type === '收入' ? -amt : amt);
+        else if (i.currency === 'TWD') {
+          if (i.type === '收入') twdInc += amt; else twdExp += amt;
         }
       });
-
-      const krwNet = krwExpense - krwIncome;
-      const twdNet = twdExpense - twdIncome;
 
       document.getElementById('krwTotalDisplay').innerText = `₩ ${Math.round(krwNet).toLocaleString()}`;
       document.getElementById('budgetDisplay').innerText = `₩ ${Math.round(budget).toLocaleString()}`;
 
       const percent = Math.round((Math.max(0, krwNet) / budget) * 100);
-      const progressBar = document.getElementById('progressBar');
-      progressBar.style.width = `${Math.min(percent, 100)}%`;
+      const pb = document.getElementById('progressBar');
+      pb.style.width = `${Math.min(percent, 100)}%`;
       document.getElementById('percentText').innerText = `已使用 ${percent}%`;
 
-      const remainingKRW = budget - krwNet;
-      const remainingText = document.getElementById('remainingText');
-      if (remainingKRW >= 0) {
-        remainingText.innerText = `剩餘: ₩ ${Math.round(remainingKRW).toLocaleString()}`;
-        remainingText.className = "text-emerald-600 font-semibold";
+      const rem = budget - krwNet;
+      const remText = document.getElementById('remainingText');
+      if (rem >= 0) {
+        remText.innerText = `剩餘: ₩ ${Math.round(rem).toLocaleString()}`;
+        remText.className = "text-emerald-600 font-semibold";
       } else {
-        remainingText.innerText = `⚠️ 已超支: ₩ ${Math.round(Math.abs(remainingKRW)).toLocaleString()}`;
-        remainingText.className = "text-rose-600 font-bold";
+        remText.innerText = `⚠️ 已超支: ₩ ${Math.round(Math.abs(rem)).toLocaleString()}`;
+        remText.className = "text-rose-600 font-bold";
       }
 
-      if (percent < 75) progressBar.className = "bg-emerald-500 h-full rounded-full transition-all duration-500";
-      else if (percent < 100) progressBar.className = "bg-amber-500 h-full rounded-full transition-all duration-500";
-      else progressBar.className = "bg-rose-500 h-full rounded-full transition-all duration-500";
+      if (percent < 75) pb.className = "bg-emerald-500 h-full rounded-full transition-all duration-500";
+      else if (percent < 100) pb.className = "bg-amber-500 h-full rounded-full transition-all duration-500";
+      else pb.className = "bg-rose-500 h-full rounded-full transition-all duration-500";
 
-      document.getElementById('twdTotalDisplay').innerText = `NT$ ${Math.round(twdNet).toLocaleString()}`;
-      document.getElementById('twdIncomeDisplay').innerText = `NT$ ${Math.round(twdIncome).toLocaleString()}`;
-      document.getElementById('twdExpenseDisplay').innerText = `NT$ ${Math.round(twdExpense).toLocaleString()}`;
+      document.getElementById('twdTotalDisplay').innerText = `NT$ ${Math.round(twdExp - twdInc).toLocaleString()}`;
+      document.getElementById('twdIncomeDisplay').innerText = `NT$ ${Math.round(twdInc).toLocaleString()}`;
+      document.getElementById('twdExpenseDisplay').innerText = `NT$ ${Math.round(twdExp).toLocaleString()}`;
 
-      if (expenseItems.length === 0) {
-        container.innerHTML = '<div class="text-center py-12 text-gray-400 text-sm bg-white rounded-2xl border border-gray-100">目前尚無日常記錄</div>';
-        return;
-      }
-
-      const categories = [...new Set(expenseItems.map(i => i.category || '未分類'))];
-      categories.forEach(cat => {
-        const catItems = expenseItems.filter(i => (i.category || '未分類') === cat);
-        const catCard = document.createElement('div');
-        catCard.className = 'bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden';
-        let catHtml = `<div class="bg-gray-50/70 px-5 py-3 font-bold text-xs uppercase tracking-wider text-gray-500 border-b border-gray-100">${cat}</div><div class="divide-y divide-gray-100">`;
-
-        catItems.forEach(item => {
-          const isIncome = item.type === '收入';
-          catHtml += `
-            <div class="flex justify-between items-center px-5 py-3.5 hover:bg-gray-50/50 transition">
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-gray-400 font-mono">${item.date || ''}</span>
-                <span class="text-xs px-2 py-0.5 rounded-full ${isIncome ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} font-semibold">${item.type || '支出'}</span>
-                <span class="text-sm font-medium text-gray-800">${item.title}</span>
-                <span class="text-xs text-gray-400">(${item.scope || 'mu'})</span>
-              </div>
-              <span class="text-sm font-bold ${isIncome ? 'text-emerald-600' : 'text-gray-900'}">
-                ${isIncome ? '+' : ''}${item.currency === 'KRW' ? '₩' : 'NT$'} ${Number(item.amount).toLocaleString()}
-              </span>
-            </div>`;
-        });
-        catHtml += `</div>`;
-        catCard.innerHTML = catHtml;
-        container.appendChild(catCard);
-      });
+      renderCardList(personalItems, container, 'indigo');
     }
 
-    // 渲染投資資產
+    // 2. 渲染網拍
+    function renderShop() {
+      localStorage.setItem('my_shop_exp', JSON.stringify(shopItems));
+      const container = document.getElementById('shopListContainer');
+      container.innerHTML = '';
+
+      let krwInc = 0, krwExp = 0, twdInc = 0, twdExp = 0;
+      shopItems.forEach(i => {
+        const amt = Number(i.amount) || 0;
+        if (i.currency === 'KRW') {
+          if (i.type === '收入') krwInc += amt; else krwExp += amt;
+        } else if (i.currency === 'TWD') {
+          if (i.type === '收入') twdInc += amt; else twdExp += amt;
+        }
+      });
+
+      const krwProfit = krwInc - krwExp;
+      const twdProfit = twdInc - twdExp;
+
+      document.getElementById('shopKrwNet').innerText = `${krwProfit >= 0 ? '+' : ''}₩ ${Math.round(krwProfit).toLocaleString()}`;
+      document.getElementById('shopKrwNet').className = `text-2xl font-black mt-1 ${krwProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+      document.getElementById('shopKrwIncome').innerText = `₩ ${Math.round(krwInc).toLocaleString()}`;
+      document.getElementById('shopKrwExpense').innerText = `₩ ${Math.round(krwExp).toLocaleString()}`;
+
+      document.getElementById('shopTwdNet').innerText = `${twdProfit >= 0 ? '+' : ''}NT$ ${Math.round(twdProfit).toLocaleString()}`;
+      document.getElementById('shopTwdNet').className = `text-2xl font-black mt-1 ${twdProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+      document.getElementById('shopTwdIncome').innerText = `NT$ ${Math.round(twdInc).toLocaleString()}`;
+      document.getElementById('shopTwdExpense').innerText = `NT$ ${Math.round(twdExp).toLocaleString()}`;
+
+      renderCardList(shopItems, container, 'rose');
+    }
+
+    // 3. 渲染投資
     function renderInvest() {
-      localStorage.setItem('my_investments', JSON.stringify(investItems));
+      localStorage.setItem('my_invest_exp', JSON.stringify(investItems));
       const container = document.getElementById('investListContainer');
       container.innerHTML = '';
 
       let krwTotal = 0, twdTotal = 0;
-      investItems.forEach(item => {
-        const amt = Number(item.amount) || 0;
-        if (item.currency === 'KRW') krwTotal += (item.type === '賣出/贖回' ? -amt : amt);
-        else if (item.currency === 'TWD') twdTotal += (item.type === '賣出/贖回' ? -amt : amt);
+      investItems.forEach(i => {
+        const amt = Number(i.amount) || 0;
+        if (i.currency === 'KRW') krwTotal += (i.type === '賣出/贖回' ? -amt : amt);
+        else if (i.currency === 'TWD') twdTotal += (i.type === '賣出/贖回' ? -amt : amt);
       });
 
       document.getElementById('investKrwTotal').innerText = `₩ ${Math.round(krwTotal).toLocaleString()}`;
       document.getElementById('investTwdTotal').innerText = `NT$ ${Math.round(twdTotal).toLocaleString()}`;
 
-      if (investItems.length === 0) {
-        container.innerHTML = '<div class="text-center py-12 text-gray-400 text-sm bg-white rounded-2xl border border-gray-100">目前尚無投資記錄</div>';
+      renderCardList(investItems, container, 'purple');
+    }
+
+    function renderCardList(items, container, color) {
+      if (items.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-gray-400 text-sm bg-white rounded-2xl border border-gray-100">目前尚無記錄</div>';
         return;
       }
-
-      const categories = [...new Set(investItems.map(i => i.category || '投資'))];
-      categories.forEach(cat => {
-        const catItems = investItems.filter(i => (i.category || '投資') === cat);
+      const cats = [...new Set(items.map(i => i.category || '一般'))];
+      cats.forEach(cat => {
+        const catItems = items.filter(i => (i.category || '一般') === cat);
         const catCard = document.createElement('div');
         catCard.className = 'bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden';
-        let catHtml = `<div class="bg-gray-50/70 px-5 py-3 font-bold text-xs uppercase tracking-wider text-purple-600 border-b border-gray-100">${cat}</div><div class="divide-y divide-gray-100">`;
+        let html = `<div class="bg-gray-50/70 px-5 py-3 font-bold text-xs uppercase tracking-wider text-${color}-600 border-b border-gray-100">${cat}</div><div class="divide-y divide-gray-100">`;
 
-        catItems.forEach(item => {
-          catHtml += `
+        catItems.forEach(i => {
+          const isInc = i.type === '收入' || i.type === '配息/股利';
+          html += `
             <div class="flex justify-between items-center px-5 py-3.5 hover:bg-gray-50/50 transition">
               <div class="flex items-center gap-2">
-                <span class="text-xs text-gray-400 font-mono">${item.date || ''}</span>
-                <span class="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-semibold">${item.type}</span>
-                <span class="text-sm font-medium text-gray-800">${item.title}</span>
-                <span class="text-xs text-gray-400">(${item.scope || 'mu'})</span>
+                <span class="text-xs text-gray-400 font-mono">${i.date || ''}</span>
+                <span class="text-xs px-2 py-0.5 rounded-full ${isInc ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'} font-semibold">${i.type}</span>
+                <span class="text-sm font-medium text-gray-800">${i.title}</span>
+                ${i.scope ? `<span class="text-xs text-gray-400">(${i.scope})</span>` : ''}
               </div>
-              <span class="text-sm font-bold text-purple-700">
-                ${item.currency === 'KRW' ? '₩' : 'NT$'} ${Number(item.amount).toLocaleString()}
+              <span class="text-sm font-bold ${isInc ? 'text-emerald-600' : 'text-gray-900'}">
+                ${isInc ? '+' : ''}${i.currency === 'KRW' ? '₩' : 'NT$'} ${Number(i.amount).toLocaleString()}
               </span>
             </div>`;
         });
-        catHtml += `</div>`;
-        catCard.innerHTML = catHtml;
+        html += `</div>`;
+        catCard.innerHTML = html;
         container.appendChild(catCard);
       });
     }
 
-    // 提交日常記帳
-    document.getElementById('addExpenseForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const submitBtn = document.getElementById('submitExpenseBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = "寫入中...";
-
-      const newItem = {
-        sheet: "日常記帳", // 👉 指定寫入的工作表
-        date: document.getElementById('itemDate').value,
-        type: document.getElementById('itemType').value,
-        title: document.getElementById('itemTitle').value,
-        category: document.getElementById('itemCategory').value,
-        scope: document.getElementById('itemScope').value,
-        amount: Number(document.getElementById('itemAmount').value),
-        currency: document.getElementById('itemCurrency').value
-      };
-
-      expenseItems.push(newItem);
-      renderExpense();
-      await postData(newItem);
-
-      document.getElementById('itemTitle').value = '';
-      document.getElementById('itemAmount').value = '';
-      setTodayDates();
-      submitBtn.disabled = false;
-      submitBtn.innerText = "同步送出";
-    });
-
-    // 提交投資資產
-    document.getElementById('addInvestForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const submitBtn = document.getElementById('submitInvestBtn');
-      submitBtn.disabled = true;
-      submitBtn.innerText = "寫入中...";
-
-      const newItem = {
-        sheet: "投資資產", // 👉 指定寫入的工作表
-        date: document.getElementById('investDate').value,
-        type: document.getElementById('investType').value,
-        title: document.getElementById('investTitle').value,
-        category: document.getElementById('investCategory').value,
-        scope: document.getElementById('investScope').value,
-        amount: Number(document.getElementById('investAmount').value),
-        currency: document.getElementById('investCurrency').value
-      };
-
-      investItems.push(newItem);
-      renderInvest();
-      await postData(newItem);
-
-      document.getElementById('investTitle').value = '';
-      document.getElementById('investAmount').value = '';
-      setTodayDates();
-      submitBtn.disabled = false;
-      submitBtn.innerText = "同步送出";
-    });
-
-    async function postData(item) {
+    async function submitData(sheetName, item, btnId, resetFn) {
+      const btn = document.getElementById(btnId);
+      btn.disabled = true;
+      btn.innerText = "寫入中...";
       if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
         try {
           await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(item)
+            body: JSON.stringify({ sheet: sheetName, ...item })
           });
           updateStatus("寫入成功！", "bg-emerald-500");
-        } catch (err) {
-          console.error("寫入失敗:", err);
+        } catch (e) {
           updateStatus("寫入失敗", "bg-rose-500");
         }
       }
+      resetFn();
+      setTodayDates();
+      btn.disabled = false;
+      btn.innerText = "同步送出";
     }
+
+    document.getElementById('addPersonalForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const item = {
+        date: document.getElementById('pDate').value,
+        type: document.getElementById('pType').value,
+        title: document.getElementById('pTitle').value,
+        category: document.getElementById('pCategory').value,
+        scope: document.getElementById('pScope').value,
+        amount: Number(document.getElementById('pAmount').value),
+        currency: document.getElementById('pCurrency').value
+      };
+      personalItems.push(item);
+      renderPersonal();
+      submitData("個人生活", item, "pSubmitBtn", () => {
+        document.getElementById('pTitle').value = '';
+        document.getElementById('pAmount').value = '';
+      });
+    });
+
+    document.getElementById('addShopForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const item = {
+        date: document.getElementById('sDate').value,
+        type: document.getElementById('sType').value,
+        title: document.getElementById('sTitle').value,
+        category: document.getElementById('sCategory').value,
+        scope: "adorable",
+        amount: Number(document.getElementById('sAmount').value),
+        currency: document.getElementById('sCurrency').value
+      };
+      shopItems.push(item);
+      renderShop();
+      submitData("網拍營運", item, "sSubmitBtn", () => {
+        document.getElementById('sTitle').value = '';
+        document.getElementById('sAmount').value = '';
+      });
+    });
+
+    document.getElementById('addInvestForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const item = {
+        date: document.getElementById('iDate').value,
+        type: document.getElementById('iType').value,
+        title: document.getElementById('iTitle').value,
+        category: document.getElementById('iCategory').value,
+        scope: document.getElementById('iScope').value,
+        amount: Number(document.getElementById('iAmount').value),
+        currency: document.getElementById('iCurrency').value
+      };
+      investItems.push(item);
+      renderInvest();
+      submitData("投資資產", item, "iSubmitBtn", () => {
+        document.getElementById('iTitle').value = '';
+        document.getElementById('iAmount').value = '';
+      });
+    });
 
     setTodayDates();
     fetchAllData();
