@@ -12,7 +12,7 @@
     <!-- 頂部標題與狀態 -->
     <header class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">💲Money💲</h1>
+        <h1 class="text-2xl font-bold text-gray-900">💲 Money come come come 💲</h1>
         <div class="flex items-center gap-2 mt-1">
           <span id="syncStatus" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           <span id="syncText" class="text-xs text-gray-500">已連線至 Google Sheets</span>
@@ -75,7 +75,7 @@
         </div>
       </section>
 
-      <!-- 個人表單 (項目名稱為選填) -->
+      <!-- 個人表單 -->
       <form id="addPersonalForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
         <input id="pDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
         <select id="pType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
@@ -141,7 +141,7 @@
         </div>
       </section>
 
-      <!-- 網拍表單 (項目名稱為選填) -->
+      <!-- 網拍表單 -->
       <form id="addShopForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
         <input id="sDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-rose-400 transition" />
         <select id="sType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
@@ -155,7 +155,6 @@
           <option value="包材耗材">包材耗材</option>
           <option value="國際運費">國際運費</option>
           <option value="包裹稅金">包裹稅金</option>
-          <option value="運費">運費</option>
           <option value="廣告/行銷">廣告/行銷</option>
           <option value="網拍收入">網拍收入</option>
           <option value="小禮物">小禮物</option>
@@ -190,7 +189,7 @@
         </div>
       </section>
 
-      <!-- 投資表單 (標的名稱為選填) -->
+      <!-- 投資表單 -->
       <form id="addInvestForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
         <input id="iDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
         <select id="iType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
@@ -226,8 +225,8 @@
   </div>
 
   <script>
-    // ⚠️ 請填入您的 Apps Script Web App 網址
-    const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+    // 你的 Apps Script 網址
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxX2Tj5Ocml0BJltic2ufUwhKiH7QektBf4J_bXB5o2oZCpJYYWWZ6yxqT5ZJJ91MTqvw/exec";
 
     let budget = Number(localStorage.getItem('my_monthly_budget')) || 1000000;
     let personalItems = [];
@@ -263,7 +262,7 @@
     }
 
     async function fetchAllData() {
-      if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbxX2Tj5Ocml0BJltic2ufUwhKiH7QektBf4J_bXB5o2oZCpJYYWWZ6yxqT5ZJJ91MTqvw/exec") {
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE_APPS_SCRIPT")) {
         personalItems = JSON.parse(localStorage.getItem('my_personal_exp')) || [];
         shopItems = JSON.parse(localStorage.getItem('my_shop_exp')) || [];
         investItems = JSON.parse(localStorage.getItem('my_invest_exp')) || [];
@@ -280,8 +279,9 @@
         shopItems = data.shop || [];
         investItems = data.invest || [];
         renderAll();
-        updateStatus("已與 Google Sheets 同步", "bg-emerald-500");
+        updateStatus("已連線至 Google Sheets", "bg-emerald-500");
       } catch (e) {
+        console.error("載入失敗:", e);
         updateStatus("同步失敗，顯示快取資料", "bg-rose-500");
         personalItems = JSON.parse(localStorage.getItem('my_personal_exp')) || [];
         shopItems = JSON.parse(localStorage.getItem('my_shop_exp')) || [];
@@ -430,7 +430,7 @@
       const btn = document.getElementById(btnId);
       btn.disabled = true;
       btn.innerText = "寫入中...";
-      if (GOOGLE_SCRIPT_URL !== "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE") {
+      if (GOOGLE_SCRIPT_URL) {
         try {
           await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
