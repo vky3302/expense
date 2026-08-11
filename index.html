@@ -12,7 +12,7 @@
     <!-- 頂部標題與狀態 -->
     <header class="flex justify-between items-center bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">記帳助手📝</h1>
+        <h1 class="text-2xl font-bold text-gray-900">💲 Money come come come 💲</h1>
         <div class="flex items-center gap-2 mt-1">
           <span id="syncStatus" class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           <span id="syncText" class="text-xs text-gray-500">已連線至 Google Sheets</span>
@@ -26,13 +26,13 @@
     <!-- 🌟 三分頁切換頁籤 -->
     <div class="flex bg-gray-200/70 p-1 rounded-2xl gap-1">
       <button id="tabPersonalBtn" onclick="switchTab('personal')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition bg-white text-indigo-600 shadow-sm">
-        🏠 個人/生活
+        🏠 LIFE
       </button>
       <button id="tabShopBtn" onclick="switchTab('shop')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800">
-        🛍️ Adorable 網拍
+        🫜 Adorable 
       </button>
       <button id="tabInvestBtn" onclick="switchTab('invest')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800">
-        📈 投資資產
+        📈 投資
       </button>
     </div>
 
@@ -152,10 +152,13 @@
           <option value="進貨成本">進貨成本</option>
           <option value="工作室房租">工作室房租</option>
           <option value="包材耗材">包材耗材</option>
-          <option value="國際運費/快遞">國際運費/快遞</option>
+          <option value="國際運費">國際運費</option>
+          <option value="包裹稅金">包裹稅金</option>
           <option value="廣告/行銷">廣告/行銷</option>
           <option value="網拍收入">網拍收入</option>
-          <option value="其他營運">其他營運</option>
+          <option value="小禮物">小禮物</option>
+          <option value="薪水">薪水</option>
+          <option value="稅金">稅金</option>
         </select>
         <input id="sAmount" type="number" placeholder="金額" required class="w-28 px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-rose-400 transition" />
         <select id="sCurrency" class="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
@@ -197,7 +200,6 @@
         <select id="iCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="ETF/基金">ETF / 基金</option>
           <option value="個股">個股</option>
-          <option value="加密貨幣">加密貨幣</option>
           <option value="定期儲蓄">定期儲蓄</option>
           <option value="其他投資">其他投資</option>
         </select>
