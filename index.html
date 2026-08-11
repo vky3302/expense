@@ -29,7 +29,7 @@
         🏠 LIFE
       </button>
       <button id="tabShopBtn" onclick="switchTab('shop')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800">
-        🫜 Adorable 
+        🫜 Adorable
       </button>
       <button id="tabInvestBtn" onclick="switchTab('invest')" class="flex-1 py-2.5 text-sm font-bold rounded-xl transition text-gray-500 hover:text-gray-800">
         📈 投資
@@ -37,7 +37,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 1️⃣ 個人/生活日常記帳 -->
+    <!-- 1️⃣ LIFE 生活日常記帳 -->
     <!-- ========================================== -->
     <div id="personalView" class="space-y-6">
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -75,14 +75,14 @@
         </div>
       </section>
 
-      <!-- 個人表單 -->
+      <!-- 個人表單 (項目名稱為選填) -->
       <form id="addPersonalForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
         <input id="pDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
         <select id="pType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="支出">支出</option>
           <option value="收入">收入</option>
         </select>
-        <input id="pTitle" type="text" placeholder="項目名稱 (如: 買菜)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
+        <input id="pTitle" type="text" placeholder="項目名稱 (選填)" class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-indigo-400 transition" />
         <select id="pCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="固定支出">固定支出</option>
           <option value="餐費">餐費</option>
@@ -99,6 +99,7 @@
           <option value="電費">電費</option>
           <option value="水費">水費</option>
           <option value="電信費">電信費</option>
+          <option value="wedding">wedding</option>
         </select>
         <select id="pScope" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="mu">mu (個人)</option>
@@ -118,7 +119,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 2️⃣ Adorable 網拍營運記帳 (預設隱藏) -->
+    <!-- 2️⃣ Adorable 網拍營運記帳 -->
     <!-- ========================================== -->
     <div id="shopView" class="space-y-6 hidden">
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -140,17 +141,17 @@
         </div>
       </section>
 
-      <!-- 網拍表單 -->
+      <!-- 網拍表單 (項目名稱為選填) -->
       <form id="addShopForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
         <input id="sDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-rose-400 transition" />
         <select id="sType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="支出">支出 (成本/開銷)</option>
           <option value="收入">收入 (營業額/訂單)</option>
         </select>
-        <input id="sTitle" type="text" placeholder="項目名稱 (如: 檔口進貨、工作室房租)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-rose-400 transition" />
+        <input id="sTitle" type="text" placeholder="項目名稱 (選填)" class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-rose-400 transition" />
         <select id="sCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
-          <option value="進貨成本">進貨成本</option>
           <option value="工作室房租">工作室房租</option>
+          <option value="進貨成本">進貨成本</option>
           <option value="包材耗材">包材耗材</option>
           <option value="國際運費">國際運費</option>
           <option value="包裹稅金">包裹稅金</option>
@@ -174,7 +175,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- 3️⃣ 投資資產 (預設隱藏) -->
+    <!-- 3️⃣ 投資資產 -->
     <!-- ========================================== -->
     <div id="investView" class="space-y-6 hidden">
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -188,7 +189,7 @@
         </div>
       </section>
 
-      <!-- 投資表單 -->
+      <!-- 投資表單 (標的名稱為選填) -->
       <form id="addInvestForm" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-wrap gap-3 items-center">
         <input id="iDate" type="date" required class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
         <select id="iType" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
@@ -196,10 +197,11 @@
           <option value="賣出/贖回">賣出 / 贖回</option>
           <option value="配息/股利">配息 / 股利</option>
         </select>
-        <input id="iTitle" type="text" placeholder="標的名稱 (如: 0050, 美股ETF)" required class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
+        <input id="iTitle" type="text" placeholder="標的名稱 (選填)" class="flex-1 min-w-[140px] px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:bg-white focus:ring-2 focus:ring-purple-400 transition" />
         <select id="iCategory" class="px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700">
           <option value="ETF/基金">ETF / 基金</option>
           <option value="個股">個股</option>
+          <option value="加密貨幣">加密貨幣</option>
           <option value="定期儲蓄">定期儲蓄</option>
           <option value="其他投資">其他投資</option>
         </select>
@@ -298,7 +300,6 @@
       renderInvest();
     }
 
-    // 1. 渲染生活
     function renderPersonal() {
       localStorage.setItem('my_personal_exp', JSON.stringify(personalItems));
       const container = document.getElementById('personalListContainer');
@@ -342,7 +343,6 @@
       renderCardList(personalItems, container, 'indigo');
     }
 
-    // 2. 渲染網拍
     function renderShop() {
       localStorage.setItem('my_shop_exp', JSON.stringify(shopItems));
       const container = document.getElementById('shopListContainer');
@@ -374,7 +374,6 @@
       renderCardList(shopItems, container, 'rose');
     }
 
-    // 3. 渲染投資
     function renderInvest() {
       localStorage.setItem('my_invest_exp', JSON.stringify(investItems));
       const container = document.getElementById('investListContainer');
@@ -449,13 +448,17 @@
       btn.innerText = "同步送出";
     }
 
+    // 1. LIFE 表單送出 (選填處理)
     document.getElementById('addPersonalForm').addEventListener('submit', (e) => {
       e.preventDefault();
+      const pCat = document.getElementById('pCategory').value;
+      const pTitle = document.getElementById('pTitle').value.trim() || pCat;
+
       const item = {
         date: document.getElementById('pDate').value,
         type: document.getElementById('pType').value,
-        title: document.getElementById('pTitle').value,
-        category: document.getElementById('pCategory').value,
+        title: pTitle,
+        category: pCat,
         scope: document.getElementById('pScope').value,
         amount: Number(document.getElementById('pAmount').value),
         currency: document.getElementById('pCurrency').value
@@ -468,32 +471,40 @@
       });
     });
 
+    // 2. Adorable 表單送出 (選填處理)
     document.getElementById('addShopForm').addEventListener('submit', (e) => {
       e.preventDefault();
+      const sCat = document.getElementById('sCategory').value;
+      const sTitle = document.getElementById('sTitle').value.trim() || sCat;
+
       const item = {
         date: document.getElementById('sDate').value,
         type: document.getElementById('sType').value,
-        title: document.getElementById('sTitle').value,
-        category: document.getElementById('sCategory').value,
+        title: sTitle,
+        category: sCat,
         scope: "adorable",
         amount: Number(document.getElementById('sAmount').value),
         currency: document.getElementById('sCurrency').value
       };
       shopItems.push(item);
       renderShop();
-      submitData("網拍營運", item, "sSubmitBtn", () => {
+      submitData("網拍", item, "sSubmitBtn", () => {
         document.getElementById('sTitle').value = '';
         document.getElementById('sAmount').value = '';
       });
     });
 
+    // 3. 投資表單送出 (選填處理)
     document.getElementById('addInvestForm').addEventListener('submit', (e) => {
       e.preventDefault();
+      const iCat = document.getElementById('iCategory').value;
+      const iTitle = document.getElementById('iTitle').value.trim() || iCat;
+
       const item = {
         date: document.getElementById('iDate').value,
         type: document.getElementById('iType').value,
-        title: document.getElementById('iTitle').value,
-        category: document.getElementById('iCategory').value,
+        title: iTitle,
+        category: iCat,
         scope: document.getElementById('iScope').value,
         amount: Number(document.getElementById('iAmount').value),
         currency: document.getElementById('iCurrency').value
