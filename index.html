@@ -6,8 +6,8 @@
   <title>💲💲</title>
   <style>
     :root {
-      --primary-color: #5850ec;
-      --bg-color: #f3f4f6;
+      --primary-color: #6366f1;
+      --bg-color: #f1f3f7;
       --card-bg: #ffffff;
       --text-main: #1f2937;
       --text-muted: #6b7280;
@@ -26,17 +26,17 @@
     body {
       background-color: var(--bg-color);
       color: var(--text-main);
-      padding: 24px;
+      padding: 24px 16px;
       display: flex;
       justify-content: center;
     }
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 860px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
     }
 
     header {
@@ -45,17 +45,13 @@
       align-items: center;
     }
 
-    .title {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-
     .status-badge {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: #059669;
       display: flex;
       align-items: center;
       gap: 6px;
+      font-weight: 500;
     }
 
     .status-dot {
@@ -66,13 +62,13 @@
     }
 
     .btn-config {
-      background: none;
+      background: #ffffff;
       border: 1px solid var(--border-color);
-      padding: 6px 12px;
-      border-radius: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
       font-size: 0.85rem;
       cursor: pointer;
-      background-color: #fff;
+      color: #374151;
     }
 
     /* Tabs */
@@ -100,7 +96,7 @@
     .tab-btn.active {
       background-color: #ffffff;
       color: var(--text-main);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
 
     /* Cards */
@@ -108,7 +104,7 @@
       background-color: var(--card-bg);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     .summary-grid {
@@ -125,7 +121,7 @@
 
     .summary-amount {
       font-size: 1.8rem;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 12px;
     }
 
@@ -153,16 +149,15 @@
     }
 
     /* Form */
-    .form-row {
+    .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 12px;
-      margin-bottom: 12px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
     }
 
     input, select {
       width: 100%;
-      padding: 10px 14px;
+      padding: 10px 12px;
       border: 1px solid var(--border-color);
       border-radius: 8px;
       font-size: 0.95rem;
@@ -180,7 +175,7 @@
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 10px 20px;
+      padding: 10px;
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
@@ -188,39 +183,85 @@
     }
 
     .btn-submit:hover {
-      background-color: #4338ca;
+      background-color: #4f46e5;
     }
 
     /* Records List */
     .records-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
     }
 
     .record-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-color);
+      padding: 14px 10px;
+      border-bottom: 1px solid #f3f4f6;
     }
 
     .record-item:last-child {
       border-bottom: none;
     }
 
+    .record-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+
+    .record-date {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #6b7280;
+      min-width: 42px;
+    }
+
     .badge-type {
       font-size: 0.75rem;
       padding: 2px 6px;
       border-radius: 4px;
-      margin-right: 6px;
+      font-weight: 600;
     }
 
     .badge-expense { background-color: #fee2e2; color: #ef4444; }
-    .badge-in { background-color: #d1fae5; color: #10b981; }
+    .badge-income { background-color: #d1fae5; color: #10b981; }
+
+    .record-owner {
+      color: #9ca3af;
+      font-size: 0.8rem;
+    }
+
+    .record-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .record-amount {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .btn-delete:hover {
+      color: #ef4444;
+    }
 
     @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      .btn-submit { grid-column: span 2; }
       .summary-grid { grid-template-columns: 1fr; }
       .tabs-container { grid-template-columns: repeat(2, 1fr); }
     }
@@ -231,19 +272,16 @@
   <div class="container">
     <!-- Header -->
     <header>
-      <div>
-        <div class="title">💰</div>
-        <div class="status-badge"><span class="status-dot"></span> 已連線至 Google Sheets</div>
-      </div>
+      <div class="status-badge"><span class="status-dot"></span> 💰 已連線至 Google Sheets</div>
       <button class="btn-config">⚙️ 設定生活預算 (KRW)</button>
     </header>
 
     <!-- Top Tabs -->
     <div class="tabs-container">
-      <button class="tab-btn active" onclick="switchCategory('life')">🏠 LIFE</button>
-      <button class="tab-btn" onclick="switchCategory('adorable')">🫜 Adorable</button>
-      <button class="tab-btn" onclick="switchCategory('invest')">📈 投資</button>
-      <button class="tab-btn" onclick="switchCategory('wedding')">💍 Wedding</button>
+      <button class="tab-btn active" onclick="switchCategory('life', event)">🏠 LIFE</button>
+      <button class="tab-btn" onclick="switchCategory('adorable', event)">🫜 Adorable</button>
+      <button class="tab-btn" onclick="switchCategory('invest', event)">📈 投資</button>
+      <button class="tab-btn" onclick="switchCategory('wedding', event)">💍 Wedding</button>
     </div>
 
     <!-- Summary Box -->
@@ -270,7 +308,7 @@
     <!-- Input Form -->
     <div class="card">
       <form id="recordForm" onsubmit="handleSubmit(event)">
-        <div class="form-row">
+        <div class="form-grid">
           <input type="date" id="formDate" required />
           <select id="formType">
             <option value="支出">支出</option>
@@ -278,36 +316,37 @@
           </select>
           <input type="text" id="formNote" placeholder="項目名稱 (選填)" />
           <select id="formSubCategory"></select>
+          
+          <!-- 對象選單：在 Wedding 分頁時會自動隱藏 -->
           <select id="formOwner">
             <option value="mu (個人)">mu (個人)</option>
             <option value="mu&jun (家庭)">mu&jun (家庭)</option>
           </select>
+
           <input type="number" id="formAmount" placeholder="金額" required />
           <select id="formCurrency">
             <option value="KRW">₩ KRW</option>
             <option value="TWD">NT$ TWD</option>
           </select>
-          <button type="submit" class="btn-submit">同步送出</button>
+          <button type="submit" class="btn-submit" id="btnSubmit">同步送出</button>
         </div>
       </form>
     </div>
 
     <!-- Record List Card -->
     <div class="card">
-      <div class="records-list" id="recordsContainer">
-        <!-- 交易記錄將渲染在此 -->
-      </div>
+      <div class="records-list" id="recordsContainer"></div>
     </div>
   </div>
 
   <script>
-    // ⚠️ 請替換為您的 Google Apps Script 部署網址
+    // ⚠️ 請填入您的 Google Apps Script 部署 URL
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxX2Tj5Ocml0BJltic2ufUwhKiH7QektBf4J_bXB5o2oZCpJYYWWZ6yxqT5ZJJ91MTqvw/exec";
 
     let currentTab = 'life';
     let allRecords = [];
 
-    // 各大分類對應的細項清單
+    // 各大類別的細項
     const subCategories = {
       life: ['固定支出', '餐費', '咖啡廳', '喝酒', '交通', '購物', '娛樂', '日用品', '買菜', '保養', '玩樂', '房租', '電費', '水費', '電信費'],
       adorable: ['工作室房租', '進貨成本', '包材耗材', '國際運費', '包裹稅金', '廣告行銷', '網拍收入', '小禮物', '薪水', '稅金'],
@@ -315,25 +354,38 @@
       wedding: ['촬영', '웨딩홀', 'helper', 'snapshot', '喜餅', '청첩장', '반지', '드레스', '축의금', '기타']
     };
 
-    // 初始化頁面
     window.onload = () => {
       document.getElementById('formDate').valueAsDate = new Date();
       updateSubCategoryOptions();
+      toggleOwnerVisibility();
       fetchRecords();
     };
 
-    // 切換分頁標籤
-    function switchCategory(category) {
+    function switchCategory(category, e) {
       currentTab = category;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      if (e) e.target.classList.add('active');
       
       updateSubCategoryOptions();
+      toggleOwnerVisibility();
       renderRecords();
       updateSummary();
     }
 
-    // 更新細項下拉選單
+    // 控制 Wedding 是否顯示 mu/jun 對象選單
+    function toggleOwnerVisibility() {
+      const ownerSelect = document.getElementById('formOwner');
+      const submitBtn = document.getElementById('btnSubmit');
+
+      if (currentTab === 'wedding') {
+        ownerSelect.style.display = 'none';
+        submitBtn.style.gridColumn = 'span 2'; // 填補隱藏後的空白格
+      } else {
+        ownerSelect.style.display = 'block';
+        submitBtn.style.gridColumn = 'auto';
+      }
+    }
+
     function updateSubCategoryOptions() {
       const select = document.getElementById('formSubCategory');
       select.innerHTML = '';
@@ -345,7 +397,21 @@
       });
     }
 
-    // 取得資料
+    // 將各種日期字串轉為 M/D 格式 (例如: "2026-08-10" 或 GMT 日期字串 -> "8/10")
+    function formatShortDate(dateVal) {
+      if (!dateVal) return '';
+      const d = new Date(dateVal);
+      if (!isNaN(d.getTime())) {
+        return `${d.getMonth() + 1}/${d.getDate()}`;
+      }
+      const parts = dateVal.toString().split(/[-/]/);
+      if (parts.length >= 3) {
+        return `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`;
+      }
+      return dateVal;
+    }
+
+    // 抓取資料
     async function fetchRecords() {
       try {
         const res = await fetch(GAS_API_URL);
@@ -365,25 +431,36 @@
 
       const filtered = allRecords.filter(r => r.category.toLowerCase() === currentTab.toLowerCase());
 
-      filtered.forEach(r => {
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:#9ca3af; padding: 20px;">尚無紀錄</div>`;
+        return;
+      }
+
+      filtered.forEach((r) => {
         const item = document.createElement('div');
         item.className = 'record-item';
+
+        const shortDate = formatShortDate(r.date);
+        // Wedding 分頁不顯示對象標籤
+        const ownerTag = (currentTab === 'wedding' || !r.owner) ? '' : `<span class="record-owner">(${r.owner})</span>`;
+
         item.innerHTML = `
-          <div>
-            <span style="font-size:0.8rem; color:#6b7280; margin-right:8px;">${r.date}</span>
+          <div class="record-left">
+            <span class="record-date">${shortDate}</span>
             <span class="badge-type ${r.type === '支出' ? 'badge-expense' : 'badge-income'}">${r.type}</span>
             <strong>${r.subCategory}</strong> ${r.note ? ` - ${r.note}` : ''}
-            <span style="color:#6b7280; font-size:0.85rem;">(${r.owner})</span>
+            ${ownerTag}
           </div>
-          <div>
-            <strong>${r.currency === 'KRW' ? '₩' : 'NT$'} ${Number(r.amount).toLocaleString()}</strong>
+          <div class="record-right">
+            <span class="record-amount">${r.currency === 'KRW' ? '₩' : 'NT$'} ${Number(r.amount).toLocaleString()}</span>
+            <button class="btn-delete" title="刪除此筆" onclick="handleDelete('${r.id}')">🗑️</button>
           </div>
         `;
         container.appendChild(item);
       });
     }
 
-    // 統計金額計算
+    // 計算總計
     function updateSummary() {
       const filtered = allRecords.filter(r => r.category.toLowerCase() === currentTab.toLowerCase());
       
@@ -408,36 +485,63 @@
       document.getElementById('twdExpense').textContent = `總支出: NT$ ${twdExp.toLocaleString()}`;
     }
 
-    // 表單送出處理
+    // 新增記錄
     async function handleSubmit(e) {
       e.preventDefault();
 
-      const payload = {
+      const newRecord = {
+        action: 'add',
+        id: 'id_' + new Date().getTime(),
         category: currentTab,
         date: document.getElementById('formDate').value,
         type: document.getElementById('formType').value,
         note: document.getElementById('formNote').value,
         subCategory: document.getElementById('formSubCategory').value,
-        owner: document.getElementById('formOwner').value,
+        owner: currentTab === 'wedding' ? 'wedding' : document.getElementById('formOwner').value,
         amount: Number(document.getElementById('formAmount').value),
         currency: document.getElementById('formCurrency').value
       };
+
+      allRecords.unshift(newRecord);
+      renderRecords();
+      updateSummary();
+
+      document.getElementById('formNote').value = '';
+      document.getElementById('formAmount').value = '';
 
       try {
         await fetch(GAS_API_URL, {
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(newRecord)
         });
-
-        allRecords.unshift(payload);
-        renderRecords();
-        updateSummary();
-        document.getElementById('formNote').value = '';
-        document.getElementById('formAmount').value = '';
       } catch (err) {
-        console.error("寫入失敗:", err);
+        console.error("送出失敗:", err);
+      }
+    }
+
+    // 刪除記錄
+    async function handleDelete(recordId) {
+      if (!confirm('確定要刪除這筆紀錄嗎？')) return;
+
+      allRecords = allRecords.filter(r => r.id !== recordId);
+      renderRecords();
+      updateSummary();
+
+      try {
+        await fetch(GAS_API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete',
+            category: currentTab,
+            id: recordId
+          })
+        });
+      } catch (err) {
+        console.error("刪除失敗:", err);
       }
     }
   </script>
