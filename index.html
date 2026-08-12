@@ -171,15 +171,17 @@
     }
 
     .btn-submit {
+      grid-column: 1 / -1; /* 讓按鈕跨滿整排 */
       background-color: var(--primary-color);
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 10px;
-      font-size: 0.95rem;
+      padding: 12px;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: background-color 0.2s;
+      margin-top: 4px;
     }
 
     .btn-submit:hover {
@@ -209,6 +211,7 @@
       align-items: center;
       gap: 10px;
       font-size: 0.95rem;
+      flex-wrap: wrap; /* 避免手機版太擠 */
     }
 
     .record-date {
@@ -231,6 +234,14 @@
     .record-owner {
       color: #9ca3af;
       font-size: 0.8rem;
+    }
+
+    .record-payment {
+      font-size: 0.8rem;
+      color: #6366f1;
+      background: #e0e7ff;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
 
     .record-right {
@@ -261,7 +272,6 @@
 
     @media (max-width: 600px) {
       .form-grid { grid-template-columns: 1fr 1fr; }
-      .btn-submit { grid-column: span 2; }
       .summary-grid { grid-template-columns: 1fr; }
       .tabs-container { grid-template-columns: repeat(2, 1fr); }
     }
@@ -309,25 +319,32 @@
     <div class="card">
       <form id="recordForm" onsubmit="handleSubmit(event)">
         <div class="form-grid">
+          <!-- 上半部 -->
           <input type="date" id="formDate" required />
           <select id="formType">
             <option value="支出">支出</option>
             <option value="收入">收入</option>
           </select>
-          <input type="text" id="formNote" placeholder="項目名稱 (選填)" />
           <select id="formSubCategory"></select>
+          <input type="text" id="formNote" placeholder="項目名稱 (選填)" />
           
-          <!-- 對象選單：在 Adorable 與 Wedding 時會自動隱藏 -->
-          <select id="formOwner">
-            <option value="mu (個人)">mu (個人)</option>
-            <option value="mu&jun (家庭)">mu&jun (家庭)</option>
-          </select>
-
+          <!-- 下半部 -->
           <input type="number" id="formAmount" placeholder="金額" required />
           <select id="formCurrency">
             <option value="KRW">₩ KRW</option>
             <option value="TWD">NT$ TWD</option>
           </select>
+          
+          <!-- 對象選單 (依條件隱藏) -->
+          <select id="formOwner">
+            <option value="mu (個人)">mu (個人)</option>
+            <option value="mu&jun (家庭)">mu&jun (家庭)</option>
+          </select>
+
+          <!-- 支付方式選單 (新增) -->
+          <select id="formPayment"></select>
+
+          <!-- 送出按鈕 -->
           <button type="submit" class="btn-submit" id="btnSubmit">同步送出</button>
         </div>
       </form>
@@ -354,9 +371,18 @@
       wedding: ['촬영', '웨딩홀', 'helper', 'snapshot', '喜餅', '청첩장', '반지', '드레스', '축의금', '기타']
     };
 
+    // 🌟 新增：各分頁的支付方式選項
+    const paymentOptions = {
+      life: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드'],
+      adorable: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', 'cash'],
+      invest: ['dawho', '國泰世華', '台新', 'cash'], // 投資預設給幾個通用選項
+      wedding: ['우리', '대한', '네이버카드', 'cash']
+    };
+
     window.onload = () => {
       document.getElementById('formDate').valueAsDate = new Date();
       updateSubCategoryOptions();
+      updatePaymentOptions();
       toggleOwnerVisibility();
       fetchRecords();
     };
@@ -367,25 +393,25 @@
       if (e) e.target.classList.add('active');
       
       updateSubCategoryOptions();
+      updatePaymentOptions();
       toggleOwnerVisibility();
       renderRecords();
       updateSummary();
     }
 
-    // 控制 Adorable 與 Wedding 隱藏對象選單
-    function toggleOwnerVisibility() {
-      const ownerSelect = document.getElementById('formOwner');
-      const submitBtn = document.getElementById('btnSubmit');
-
-      if (currentTab === 'wedding' || currentTab === 'adorable') {
-        ownerSelect.style.display = 'none';
-        submitBtn.style.gridColumn = 'span 2';
-      } else {
-        ownerSelect.style.display = 'block';
-        submitBtn.style.gridColumn = 'auto';
-      }
+    // 更新支付方式選單
+    function updatePaymentOptions() {
+      const select = document.getElementById('formPayment');
+      select.innerHTML = '';
+      paymentOptions[currentTab].forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        select.appendChild(opt);
+      });
     }
 
+    // 更新細項選單
     function updateSubCategoryOptions() {
       const select = document.getElementById('formSubCategory');
       select.innerHTML = '';
@@ -397,7 +423,16 @@
       });
     }
 
-    // 格式化為 M/D (例: 8/10)
+    // 控制對象選單顯示與隱藏
+    function toggleOwnerVisibility() {
+      const ownerSelect = document.getElementById('formOwner');
+      if (currentTab === 'wedding' || currentTab === 'adorable') {
+        ownerSelect.style.display = 'none';
+      } else {
+        ownerSelect.style.display = 'block';
+      }
+    }
+
     function formatShortDate(dateVal) {
       if (!dateVal) return '';
       const d = new Date(dateVal);
@@ -442,9 +477,11 @@
 
         const shortDate = formatShortDate(r.date);
         
-        // Adorable 和 Wedding 不顯示 (mu) 或 (mu&jun)
         const hideOwner = (currentTab === 'wedding' || currentTab === 'adorable' || !r.owner || r.owner === 'adorable' || r.owner === 'wedding');
         const ownerTag = hideOwner ? '' : `<span class="record-owner">(${r.owner})</span>`;
+        
+        // 渲染支付方式標籤
+        const paymentTag = r.payment ? `<span class="record-payment">💳 ${r.payment}</span>` : '';
 
         item.innerHTML = `
           <div class="record-left">
@@ -452,6 +489,7 @@
             <span class="badge-type ${r.type === '支出' ? 'badge-expense' : 'badge-income'}">${r.type}</span>
             <strong>${r.subCategory}</strong> ${r.note ? ` - ${r.note}` : ''}
             ${ownerTag}
+            ${paymentTag}
           </div>
           <div class="record-right">
             <span class="record-amount">${r.currency === 'KRW' ? '₩' : 'NT$'} ${Number(r.amount).toLocaleString()}</span>
@@ -505,7 +543,8 @@
         subCategory: document.getElementById('formSubCategory').value,
         owner: ownerVal,
         amount: Number(document.getElementById('formAmount').value),
-        currency: document.getElementById('formCurrency').value
+        currency: document.getElementById('formCurrency').value,
+        payment: document.getElementById('formPayment').value // 🌟 取出支付方式
       };
 
       allRecords.unshift(newRecord);
