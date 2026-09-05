@@ -171,7 +171,7 @@
     }
 
     .btn-submit {
-      grid-column: 1 / -1; /* 讓按鈕跨滿整排 */
+      grid-column: 1 / -1; 
       background-color: var(--primary-color);
       color: #fff;
       border: none;
@@ -211,7 +211,7 @@
       align-items: center;
       gap: 10px;
       font-size: 0.95rem;
-      flex-wrap: wrap; /* 避免手機版太擠 */
+      flex-wrap: wrap; 
     }
 
     .record-date {
@@ -270,9 +270,7 @@
       color: #ef4444;
     }
 
-    /* ====================
-       明細清單標頭與排序按鈕
-       ==================== */
+    /* 明細清單標頭與排序按鈕 */
     .records-header {
       display: flex;
       justify-content: space-between;
@@ -330,6 +328,11 @@
       <button class="tab-btn" onclick="switchCategory('wedding', event)">💍 Wedding</button>
     </div>
 
+    <!-- 🌟 新增：月份篩選器 (每月1號自動重置畫面) -->
+    <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+      <input type="month" id="monthFilter" onchange="handleMonthChange()" style="width: auto; padding: 6px 12px; font-weight: 600; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; background: #fff;" title="選擇月份" />
+    </div>
+
     <!-- Summary Box -->
     <div class="card summary-grid">
       <div class="summary-box">
@@ -377,7 +380,7 @@
             <option value="mu&jun (家庭)">mu&jun (家庭)</option>
           </select>
 
-          <!-- 支付方式選單 (新增) -->
+          <!-- 支付方式選單 -->
           <select id="formPayment"></select>
 
           <!-- 送出按鈕 -->
@@ -386,7 +389,7 @@
       </form>
     </div>
 
-    <!-- Record List Card (已加入排序按鈕) -->
+    <!-- Record List Card -->
     <div class="card">
       <div class="records-header">
         <span class="records-title">📝 明細清單</span>
@@ -413,21 +416,35 @@
       wedding: ['촬영', '웨딩홀', 'helper', 'snapshot', '喜餅', '청첩장', '반지', '드레스', '축의금', '기타']
     };
 
-    // 🌟 新增：各分頁的支付方式選項
+    // 各分頁的支付方式選項
     const paymentOptions = {
       life: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', '쿠팡', '농협'],
       adorable: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', 'cash'],
-      invest: ['dawho', '國泰世華', '台新', 'cash'], // 投資預設給幾個通用選項
+      invest: ['dawho', '國泰世華', '台新', 'cash'], 
       wedding: ['우리', '대한', '네이버카드', 'cash']
     };
 
     window.onload = () => {
+      // 預設表單日期為今日
       document.getElementById('formDate').valueAsDate = new Date();
+
+      // 🌟 新增：預設「月份篩選器」為當前真實月份 (實現1號自動重置)
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      document.getElementById('monthFilter').value = `${yyyy}-${mm}`;
+
       updateSubCategoryOptions();
       updatePaymentOptions();
       toggleOwnerVisibility();
       fetchRecords();
     };
+
+    // 🌟 新增：切換月份時重新渲染
+    function handleMonthChange() {
+      renderRecords();
+      updateSummary();
+    }
 
     function switchCategory(category, e) {
       currentTab = category;
@@ -441,7 +458,6 @@
       updateSummary();
     }
 
-    // 更新支付方式選單
     function updatePaymentOptions() {
       const select = document.getElementById('formPayment');
       select.innerHTML = '';
@@ -453,7 +469,6 @@
       });
     }
 
-    // 更新細項選單
     function updateSubCategoryOptions() {
       const select = document.getElementById('formSubCategory');
       select.innerHTML = '';
@@ -465,7 +480,6 @@
       });
     }
 
-    // 控制對象選單顯示與隱藏
     function toggleOwnerVisibility() {
       const ownerSelect = document.getElementById('formOwner');
       if (currentTab === 'wedding' || currentTab === 'adorable') {
@@ -488,7 +502,27 @@
       return dateVal;
     }
 
-    // 抓取資料
+    // 🌟 新增：過濾資料的共用函式 (過濾出「當前分頁」且「符合所選月份」的資料)
+    function getFilteredRecords() {
+      const selectedMonth = document.getElementById('monthFilter').value; // 格式: "YYYY-MM"
+      
+      return allRecords.filter(r => {
+        // 1. 檢查分類是否符合當前 Tab
+        if (r.category.toLowerCase() !== currentTab.toLowerCase()) return false;
+        
+        // 2. 檢查日期是否符合所選月份
+        if (!r.date) return false;
+        const d = new Date(r.date);
+        if (isNaN(d.getTime())) return false; // 排除無效日期
+
+        const rYear = d.getFullYear();
+        const rMonth = String(d.getMonth() + 1).padStart(2, '0');
+        const rYyyyMm = `${rYear}-${rMonth}`; // 組裝成 "YYYY-MM" 格式做比對
+
+        return rYyyyMm === selectedMonth;
+      });
+    }
+
     async function fetchRecords() {
       try {
         const res = await fetch(GAS_API_URL);
@@ -506,7 +540,8 @@
       const container = document.getElementById('recordsContainer');
       container.innerHTML = '';
 
-      const filtered = allRecords.filter(r => r.category.toLowerCase() === currentTab.toLowerCase());
+      // 🌟 改用新的過濾函式
+      const filtered = getFilteredRecords();
 
       if (filtered.length === 0) {
         container.innerHTML = `<div style="text-align:center; color:#9ca3af; padding: 20px;">尚無紀錄</div>`;
@@ -522,7 +557,6 @@
         const hideOwner = (currentTab === 'wedding' || currentTab === 'adorable' || !r.owner || r.owner === 'adorable' || r.owner === 'wedding');
         const ownerTag = hideOwner ? '' : `<span class="record-owner">(${r.owner})</span>`;
         
-        // 渲染支付方式標籤
         const paymentTag = r.payment ? `<span class="record-payment">💳 ${r.payment}</span>` : '';
 
         item.innerHTML = `
@@ -544,7 +578,8 @@
 
     // 計算總計
     function updateSummary() {
-      const filtered = allRecords.filter(r => r.category.toLowerCase() === currentTab.toLowerCase());
+      // 🌟 改用新的過濾函式
+      const filtered = getFilteredRecords();
       
       let krwExp = 0, krwInc = 0;
       let twdExp = 0, twdInc = 0;
@@ -586,10 +621,16 @@
         owner: ownerVal,
         amount: Number(document.getElementById('formAmount').value),
         currency: document.getElementById('formCurrency').value,
-        payment: document.getElementById('formPayment').value // 🌟 取出支付方式
+        payment: document.getElementById('formPayment').value
       };
 
       allRecords.unshift(newRecord);
+      
+      // 🌟 若新增的日期不在目前選擇的月份內，自動將月份篩選切過去
+      const newD = new Date(newRecord.date);
+      const newYyyyMm = `${newD.getFullYear()}-${String(newD.getMonth() + 1).padStart(2, '0')}`;
+      document.getElementById('monthFilter').value = newYyyyMm;
+
       renderRecords();
       updateSummary();
 
@@ -632,31 +673,25 @@
       }
     }
 
-    // ====================
-    // 排序邏輯 (新增)
-    // ====================
-    let isDescending = true; // 預設降冪 (最新的日期在最上面)
+    // 排序邏輯
+    let isDescending = true; 
 
     function toggleSort() {
       isDescending = !isDescending;
       
-      // 切換按鈕上的箭頭圖示
       document.getElementById('sortIcon').textContent = isDescending ? '⬇️' : '⬆️';
 
-      // 針對所有紀錄進行排序
       allRecords.sort((a, b) => {
-        // 處理可能為空或無效的日期，確保不會報錯
         const dateA = a.date ? new Date(a.date).getTime() : 0;
         const dateB = b.date ? new Date(b.date).getTime() : 0;
         
         if (isDescending) {
-          return dateB - dateA; // 新日期在上
+          return dateB - dateA; 
         } else {
-          return dateA - dateB; // 舊日期在上
+          return dateA - dateB; 
         }
       });
 
-      // 排序完成後，重新渲染當前分頁的清單
       renderRecords();
     }
   </script>
