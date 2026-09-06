@@ -320,15 +320,15 @@
       <button class="btn-config">⚙️ 設定生活預算 (KRW)</button>
     </header>
 
-    <!-- Top Tabs -->
+    <!-- Top Tabs (已修改：分離 mu 與 mu_jun，移除 wedding) -->
     <div class="tabs-container">
-      <button class="tab-btn active" onclick="switchCategory('life', event)">🏠 LIFE</button>
+      <button class="tab-btn active" onclick="switchCategory('life', event)">🏠 mu</button>
+      <button class="tab-btn" onclick="switchCategory('mu_jun', event)">👩‍❤️‍👨 mu&jun</button>
       <button class="tab-btn" onclick="switchCategory('adorable', event)">🫜 Adorable</button>
       <button class="tab-btn" onclick="switchCategory('invest', event)">📈 投資</button>
-      <button class="tab-btn" onclick="switchCategory('wedding', event)">💍 Wedding</button>
     </div>
 
-    <!-- 🌟 新增：月份篩選器 (每月1號自動重置畫面) -->
+    <!-- 月份篩選器 (每月1號自動重置畫面) -->
     <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
       <input type="month" id="monthFilter" onchange="handleMonthChange()" style="width: auto; padding: 6px 12px; font-weight: 600; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; background: #fff;" title="選擇月份" />
     </div>
@@ -374,7 +374,7 @@
             <option value="TWD">NT$ TWD</option>
           </select>
           
-          <!-- 對象選單 (依條件隱藏) -->
+          <!-- 對象選單 (依條件自動隱藏) -->
           <select id="formOwner">
             <option value="mu (個人)">mu (個人)</option>
             <option value="mu&jun (家庭)">mu&jun (家庭)</option>
@@ -408,27 +408,27 @@
     let currentTab = 'life';
     let allRecords = [];
 
-    // 各分頁子細項
+    // 各分頁子細項 (新增 mu_jun 並且移除 wedding)
     const subCategories = {
       life: ['固定支出', '餐費', '咖啡廳', '喝酒', '交通', '購物', '娛樂', '日用品', '買菜', '保養', '玩樂', '房租', '電費', '水費', '電信費'],
+      mu_jun: ['固定支出', '餐費', '咖啡廳', '喝酒', '交通', '購物', '娛樂', '日用品', '買菜', '保養', '玩樂', '房租', '電費', '水費', '電信費'],
       adorable: ['工作室房租', '進貨成本', '包材耗材', '國際運費', '包裹稅金', '廣告行銷', '網拍收入', '小禮物', '薪水', '稅金', '退款', '運費', '官網費用'],
-      invest: ['股票', '基金', '加密貨幣', '外幣', '定存'],
-      wedding: ['촬영', '웨딩홀', 'helper', 'snapshot', '喜餅', '청첩장', '반지', '드레스', '축의금', '기타']
+      invest: ['股票', '基金', '加密貨幣', '外幣', '定存']
     };
 
-    // 各分頁的支付方式選項
+    // 各分頁的支付方式選項 (新增 mu_jun 並且移除 wedding)
     const paymentOptions = {
       life: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', '쿠팡', '농협'],
+      mu_jun: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', '쿠팡', '농협'],
       adorable: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', 'cash'],
-      invest: ['dawho', '國泰世華', '台新', 'cash'], 
-      wedding: ['우리', '대한', '네이버카드', 'cash']
+      invest: ['dawho', '國泰世華', '台新', 'cash']
     };
 
     window.onload = () => {
       // 預設表單日期為今日
       document.getElementById('formDate').valueAsDate = new Date();
 
-      // 🌟 新增：預設「月份篩選器」為當前真實月份 (實現1號自動重置)
+      // 預設「月份篩選器」為當前真實月份 (實現1號自動重置)
       const today = new Date();
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, '0');
@@ -440,7 +440,6 @@
       fetchRecords();
     };
 
-    // 🌟 新增：切換月份時重新渲染
     function handleMonthChange() {
       renderRecords();
       updateSummary();
@@ -480,9 +479,10 @@
       });
     }
 
+    // 因為 mu 和 mu&jun 已經分開為獨立分頁，所以選單隱藏，由系統自動代入
     function toggleOwnerVisibility() {
       const ownerSelect = document.getElementById('formOwner');
-      if (currentTab === 'wedding' || currentTab === 'adorable') {
+      if (currentTab === 'mu_jun' || currentTab === 'adorable' || currentTab === 'life') {
         ownerSelect.style.display = 'none';
       } else {
         ownerSelect.style.display = 'block';
@@ -502,24 +502,40 @@
       return dateVal;
     }
 
-    // 🌟 新增：過濾資料的共用函式 (過濾出「當前分頁」且「符合所選月份」的資料)
+    // 🌟 相容舊資料的過濾函式 (自動把原本 life 裡的 mu&jun 資料分流到新分頁)
     function getFilteredRecords() {
-      const selectedMonth = document.getElementById('monthFilter').value; // 格式: "YYYY-MM"
+      const selectedMonth = document.getElementById('monthFilter').value; 
       
       return allRecords.filter(r => {
-        // 1. 檢查分類是否符合當前 Tab
-        if (r.category.toLowerCase() !== currentTab.toLowerCase()) return false;
-        
-        // 2. 檢查日期是否符合所選月份
+        // 1. 檢查日期是否符合所選月份
         if (!r.date) return false;
         const d = new Date(r.date);
-        if (isNaN(d.getTime())) return false; // 排除無效日期
-
+        if (isNaN(d.getTime())) return false; 
         const rYear = d.getFullYear();
         const rMonth = String(d.getMonth() + 1).padStart(2, '0');
-        const rYyyyMm = `${rYear}-${rMonth}`; // 組裝成 "YYYY-MM" 格式做比對
+        const rYyyyMm = `${rYear}-${rMonth}`; 
+        if (rYyyyMm !== selectedMonth) return false;
 
-        return rYyyyMm === selectedMonth;
+        // 2. 檢查分類與對象 (支援舊資料的無縫接軌)
+        const cat = (r.category || '').toLowerCase();
+        const owner = r.owner || '';
+
+        if (currentTab === 'life') {
+          // mu 個人：顯示分類是 life，且對象「不是」 mu&jun (家庭) 的資料
+          return cat === 'life' && owner !== 'mu&jun (家庭)';
+        }
+        if (currentTab === 'mu_jun') {
+          // mu&jun 家庭：顯示新分類 mu_jun，或者舊資料 (分類是 life 但對象是 mu&jun)
+          return cat === 'mu_jun' || (cat === 'life' && owner === 'mu&jun (家庭)');
+        }
+        if (currentTab === 'adorable') {
+          return cat === 'adorable';
+        }
+        if (currentTab === 'invest') {
+          return cat === 'invest';
+        }
+
+        return false;
       });
     }
 
@@ -540,7 +556,6 @@
       const container = document.getElementById('recordsContainer');
       container.innerHTML = '';
 
-      // 🌟 改用新的過濾函式
       const filtered = getFilteredRecords();
 
       if (filtered.length === 0) {
@@ -554,7 +569,8 @@
 
         const shortDate = formatShortDate(r.date);
         
-        const hideOwner = (currentTab === 'wedding' || currentTab === 'adorable' || !r.owner || r.owner === 'adorable' || r.owner === 'wedding');
+        // mu 和 mu_jun 分頁已經很明確了，不需要在明細再顯示對象名稱
+        const hideOwner = (currentTab === 'mu_jun' || currentTab === 'life' || currentTab === 'adorable' || !r.owner || r.owner === 'adorable');
         const ownerTag = hideOwner ? '' : `<span class="record-owner">(${r.owner})</span>`;
         
         const paymentTag = r.payment ? `<span class="record-payment">💳 ${r.payment}</span>` : '';
@@ -578,7 +594,6 @@
 
     // 計算總計
     function updateSummary() {
-      // 🌟 改用新的過濾函式
       const filtered = getFilteredRecords();
       
       let krwExp = 0, krwInc = 0;
@@ -606,14 +621,16 @@
     async function handleSubmit(e) {
       e.preventDefault();
 
+      // 根據分頁自動指定對象，不用手動選
       let ownerVal = document.getElementById('formOwner').value;
-      if (currentTab === 'wedding') ownerVal = 'wedding';
+      if (currentTab === 'mu_jun') ownerVal = 'mu&jun (家庭)';
+      if (currentTab === 'life') ownerVal = 'mu (個人)';
       if (currentTab === 'adorable') ownerVal = 'adorable';
 
       const newRecord = {
         action: 'add',
         id: 'id_' + new Date().getTime(),
-        category: currentTab,
+        category: currentTab, 
         date: document.getElementById('formDate').value,
         type: document.getElementById('formType').value,
         note: document.getElementById('formNote').value,
@@ -626,7 +643,7 @@
 
       allRecords.unshift(newRecord);
       
-      // 🌟 若新增的日期不在目前選擇的月份內，自動將月份篩選切過去
+      // 若新增的日期不在目前選擇的月份內，自動將月份篩選切過去
       const newD = new Date(newRecord.date);
       const newYyyyMm = `${newD.getFullYear()}-${String(newD.getMonth() + 1).padStart(2, '0')}`;
       document.getElementById('monthFilter').value = newYyyyMm;
