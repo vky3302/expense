@@ -71,10 +71,10 @@
       color: #374151;
     }
 
-    /* Tabs */
+    /* Tabs (已調整為 3 個分頁) */
     .tabs-container {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       background-color: #e5e7eb;
       padding: 4px;
       border-radius: 12px;
@@ -307,7 +307,7 @@
     @media (max-width: 600px) {
       .form-grid { grid-template-columns: 1fr 1fr; }
       .summary-grid { grid-template-columns: 1fr; }
-      .tabs-container { grid-template-columns: repeat(2, 1fr); }
+      .tabs-container { grid-template-columns: repeat(3, 1fr); }
     }
   </style>
 </head>
@@ -320,11 +320,10 @@
       <button class="btn-config">⚙️ 設定生活預算 (KRW)</button>
     </header>
 
-    <!-- Top Tabs -->
+    <!-- Top Tabs (已移除 Adorable) -->
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchCategory('life', event)">🏠 mu</button>
       <button class="tab-btn" onclick="switchCategory('mu_jun', event)">👩‍❤️‍👨 mu&jun</button>
-      <button class="tab-btn" onclick="switchCategory('adorable', event)">🫜 Adorable</button>
       <button class="tab-btn" onclick="switchCategory('invest', event)">📈 投資</button>
     </div>
 
@@ -357,7 +356,7 @@
     <!-- Input Form -->
     <div class="card">
       
-      <!-- 🌟 新增：mu&jun 專屬的一鍵記帳按鈕區塊 -->
+      <!-- mu&jun 專屬的一鍵記帳按鈕區塊 -->
       <div id="quickAddContainer" style="display: none; margin-bottom: 14px;">
         <button type="button" class="btn-config" style="color: #4f46e5; border-color: #a5b4fc; background-color: #e0e7ff; font-weight: 600; width: 100%; text-align: center; padding: 10px;" onclick="addTelecomExpense()">
           ⚡ 一鍵記帳：本月通信費 (₩ 158,700)
@@ -416,19 +415,17 @@
     let currentTab = 'life';
     let allRecords = [];
 
-    // 各分頁子細項
+    // 各分頁子細項 (已移除 Adorable)
     const subCategories = {
       life: ['固定支出', '餐費', '咖啡廳', '喝酒', '交通', '購物', '娛樂', '日用品', '買菜', '保養', '玩樂', '房租', '電費', '水費', '電信費'],
       mu_jun: ['固定支出', '餐費', '咖啡廳', '喝酒', '交通', '購物', '娛樂', '日用品', '買菜', '保養', '玩樂', '房租', '電費', '水費', '電信費'],
-      adorable: ['工作室房租', '進貨成本', '包材耗材', '國際運費', '包裹稅金', '廣告行銷', '網拍收入', '小禮物', '薪水', '稅金', '退款', '運費', '官網費用'],
       invest: ['股票', '基金', '加密貨幣', '外幣', '定存']
     };
 
-    // 各分頁的支付方式選項
+    // 各分頁的支付方式選項 (已移除 Adorable)
     const paymentOptions = {
       life: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', '쿠팡', '농협'],
       mu_jun: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', '쿠팡', '농협'],
-      adorable: ['dawho', 'daway', '國泰世華', '台新', '우리', '대한', '네이버카드', 'cash'],
       invest: ['dawho', '國泰世華', '台新', 'cash']
     };
 
@@ -487,13 +484,13 @@
 
     function toggleOwnerVisibility() {
       const ownerSelect = document.getElementById('formOwner');
-      if (currentTab === 'mu_jun' || currentTab === 'adorable' || currentTab === 'life') {
+      if (currentTab === 'mu_jun' || currentTab === 'life') {
         ownerSelect.style.display = 'none';
       } else {
         ownerSelect.style.display = 'block';
       }
 
-      // 🌟 切換到 mu_jun 時，顯示一鍵記帳按鈕
+      // 切換到 mu_jun 時，顯示一鍵記帳按鈕
       const quickAddBtn = document.getElementById('quickAddContainer');
       if (quickAddBtn) {
         quickAddBtn.style.display = (currentTab === 'mu_jun') ? 'block' : 'none';
@@ -534,9 +531,6 @@
         if (currentTab === 'mu_jun') {
           return cat === 'mu_jun' || (cat === 'life' && owner === 'mu&jun (家庭)');
         }
-        if (currentTab === 'adorable') {
-          return cat === 'adorable';
-        }
         if (currentTab === 'invest') {
           return cat === 'invest';
         }
@@ -574,7 +568,7 @@
 
         const shortDate = formatShortDate(r.date);
         
-        const hideOwner = (currentTab === 'mu_jun' || currentTab === 'life' || currentTab === 'adorable' || !r.owner || r.owner === 'adorable');
+        const hideOwner = (currentTab === 'mu_jun' || currentTab === 'life' || !r.owner);
         const ownerTag = hideOwner ? '' : `<span class="record-owner">(${r.owner})</span>`;
         
         const paymentTag = r.payment ? `<span class="record-payment">💳 ${r.payment}</span>` : '';
@@ -596,7 +590,7 @@
       });
     }
 
-    // 計算總計 (🌟 已加入 mu_jun 的 150萬預算邏輯)
+    // 計算總計
     function updateSummary() {
       const filtered = getFilteredRecords();
       
@@ -620,7 +614,7 @@
       document.getElementById('twdIncome').textContent = `總收入: NT$ ${twdInc.toLocaleString()}`;
       document.getElementById('twdExpense').textContent = `總支出: NT$ ${twdExp.toLocaleString()}`;
 
-      // 🌟 預算與進度條計算
+      // 預算與進度條計算
       let currentBudget = 0;
       if (currentTab === 'mu_jun') {
         currentBudget = 1500000; // mu&jun 每月預算 150 萬
@@ -632,11 +626,10 @@
 
       if (currentBudget > 0) {
         let usagePercent = (krwNet / currentBudget) * 100;
-        if (usagePercent < 0) usagePercent = 0; // 如果收入大於支出，顯示 0%
+        if (usagePercent < 0) usagePercent = 0; 
         
         progressBar.style.width = `${Math.min(usagePercent, 100)}%`;
         
-        // 超過預算變紅色，否則維持綠色
         progressBar.style.backgroundColor = usagePercent > 100 ? '#ef4444' : '#10b981';
         usageText.textContent = `已使用 ${usagePercent.toFixed(1)}%`;
         
@@ -646,10 +639,9 @@
           remainingText.style.color = 'var(--text-muted)';
         } else {
           remainingText.textContent = `超支: ₩ ${Math.abs(remaining).toLocaleString()}`;
-          remainingText.style.color = '#ef4444'; // 超支顯示紅色字
+          remainingText.style.color = '#ef4444'; 
         }
       } else {
-        // 沒有設定預算的分頁 (例如原本的顯示)
         progressBar.style.width = `0%`;
         usageText.textContent = `已使用 - %`;
         remainingText.textContent = `未設定預算`;
@@ -657,7 +649,7 @@
       }
     }
 
-    // 🌟 專屬的一鍵記帳函式：新增通信費
+    // 新增通信費
     async function addTelecomExpense() {
       const amount = 70100 + 60100 + 28500; // 158700
       
@@ -674,7 +666,7 @@
         owner: 'mu&jun (家庭)',
         amount: amount,
         currency: 'KRW',
-        payment: '우리' // 預設使用 우리 支付
+        payment: '우리' 
       };
 
       allRecords.unshift(newRecord);
@@ -705,12 +697,11 @@
       let ownerVal = document.getElementById('formOwner').value;
       if (currentTab === 'mu_jun') ownerVal = 'mu&jun (家庭)';
       if (currentTab === 'life') ownerVal = 'mu (個人)';
-      if (currentTab === 'adorable') ownerVal = 'adorable';
 
       const newRecord = {
         action: 'add',
         id: 'id_' + new Date().getTime(),
-        category: currentTab, 
+        category: currentTab,
         date: document.getElementById('formDate').value,
         type: document.getElementById('formType').value,
         note: document.getElementById('formNote').value,
